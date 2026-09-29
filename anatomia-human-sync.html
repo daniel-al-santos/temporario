@@ -1,0 +1,2613 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root{color-scheme:light}
+body{margin:0;font:14px system-ui,-apple-system,sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Anatomia do human_sync</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=JetBrains+Mono:wght@400;500;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap">
+
+<style>
+:root{
+  color-scheme: light;
+  --ground:#e9edf2;
+  --panel:#ffffff;
+  --stage:#f5f8fa;
+  --grid:#dce4ec;
+  --grid-strong:#c5d1de;
+  --rule:#d4dce6;
+  --ink:#111923;
+  --ink-soft:#5b6a7b;
+  --accent:#b96110;
+  --accent-wash:#f8ead9;
+  --magnet:#a51f62;
+  --perp:#0b757f;
+  --robot:#8593a4;
+  --horiz:#1f5fa8;
+  --horiz-wash:#dde9f7;
+  --vert:#2e7d3f;
+  --vert-wash:#dff0e2;
+  --shadow: 0 1px 2px rgba(17,25,35,.05), 0 8px 24px -16px rgba(17,25,35,.28);
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    color-scheme: dark;
+    --ground:#0b1016;
+    --panel:#141c25;
+    --stage:#101821;
+    --grid:#1b2733;
+    --grid-strong:#27343f;
+    --rule:#24303c;
+    --ink:#e3eaf2;
+    --ink-soft:#92a2b3;
+    --accent:#eda047;
+    --accent-wash:#33261a;
+    --magnet:#f272aa;
+    --perp:#41c1ca;
+    --robot:#6a7a8d;
+    --horiz:#7ab5f0;
+    --horiz-wash:#17293c;
+    --vert:#6fc47f;
+    --vert-wash:#17301e;
+    --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -18px rgba(0,0,0,.9);
+  }
+}
+:root[data-theme="dark"]{
+  color-scheme: dark;
+  --ground:#0b1016;
+  --panel:#141c25;
+  --stage:#101821;
+  --grid:#1b2733;
+  --grid-strong:#27343f;
+  --rule:#24303c;
+  --ink:#e3eaf2;
+  --ink-soft:#92a2b3;
+  --accent:#eda047;
+  --accent-wash:#33261a;
+  --magnet:#f272aa;
+  --perp:#41c1ca;
+  --robot:#6a7a8d;
+  --horiz:#7ab5f0;
+  --horiz-wash:#17293c;
+  --vert:#6fc47f;
+  --vert-wash:#17301e;
+  --shadow: 0 1px 2px rgba(0,0,0,.4), 0 10px 28px -18px rgba(0,0,0,.9);
+}
+
+*{ box-sizing:border-box; }
+
+body{
+  background:var(--ground);
+  color:var(--ink);
+  font-family:"Source Serif 4", Georgia, "Times New Roman", serif;
+  font-size:16px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+
+.page{
+  max-width:1060px;
+  margin:0 auto;
+  padding-inline:20px;
+  padding-block:44px 60px;
+  display:flex;
+  flex-direction:column;
+  gap:26px;
+}
+
+/* ---------- cabeçalho ---------- */
+.lede{ display:flex; flex-direction:column; gap:14px; }
+.eyebrow{
+  margin:0;
+  font-family:"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size:.72rem; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--ink-soft);
+}
+h1{
+  margin:0;
+  font-family:"Archivo", "Helvetica Neue", Arial, sans-serif;
+  font-weight:700; font-size:clamp(2rem, 6vw, 3.1rem);
+  line-height:1.04; letter-spacing:-.025em; text-wrap:balance;
+}
+.sub{ margin:0; max-width:64ch; color:var(--ink-soft); font-size:1.08rem; }
+.sub strong{ color:var(--ink); font-weight:600; }
+
+.keycolors{
+  display:flex; flex-wrap:wrap; gap:10px;
+  margin:4px 0 0; padding:0; list-style:none;
+}
+.keycolors li{
+  display:flex; align-items:center; gap:8px;
+  padding:7px 12px; border-radius:3px;
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.76rem;
+}
+.keycolors .kh{ background:var(--horiz-wash); color:var(--horiz); }
+.keycolors .kv{ background:var(--vert-wash); color:var(--vert); }
+.keycolors .ka{ background:var(--accent-wash); color:var(--accent); }
+.keycolors b{ font-weight:700; }
+.colornote{
+  margin:0; font-size:.95rem; color:var(--ink-soft); max-width:64ch;
+}
+
+/* ---------- bancadas ---------- */
+.bench{
+  background:var(--panel);
+  border:1px solid var(--rule);
+  border-radius:4px;
+  box-shadow:var(--shadow);
+  padding:clamp(18px, 3vw, 30px);
+  display:flex; flex-direction:column; gap:20px;
+}
+.bench-head{ display:flex; flex-direction:column; gap:8px; }
+.recipe{
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.72rem; letter-spacing:.13em; text-transform:uppercase;
+  color:var(--accent);
+}
+.bench h2{
+  margin:0;
+  font-family:"Archivo", Arial, sans-serif;
+  font-weight:600; font-size:clamp(1.3rem, 3vw, 1.62rem);
+  letter-spacing:-.015em; line-height:1.15; text-wrap:balance;
+}
+.bench-head p{ margin:0; max-width:64ch; color:var(--ink-soft); }
+
+.bench-body{
+  display:grid;
+  grid-template-columns: minmax(0, 1.55fr) minmax(252px, 1fr);
+  gap:24px; align-items:start;
+}
+@media (max-width: 880px){ .bench-body{ grid-template-columns:1fr; } }
+
+.stage{ display:flex; flex-direction:column; gap:10px; min-width:0; }
+.canvas-wrap{
+  background:var(--stage);
+  border:1px solid var(--rule);
+  border-radius:3px; overflow:hidden; line-height:0;
+}
+canvas{ display:block; touch-action:none; cursor:grab; }
+canvas.dragging{ cursor:grabbing; }
+.hint{
+  margin:0;
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.72rem; color:var(--ink-soft); line-height:1.55;
+}
+
+/* frase grande do passo atual */
+.saying{
+  border-left:4px solid var(--accent);
+  background:var(--accent-wash);
+  padding:13px 16px;
+  font-size:1.05rem; line-height:1.5;
+  border-radius:0 3px 3px 0;
+  min-height:3.6em;
+  display:flex; align-items:center;
+}
+.saying .n{
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-weight:700; color:var(--accent); margin-right:9px; font-size:.9rem;
+}
+.saying b{ font-weight:600; }
+.saying .bl{ color:var(--horiz); font-weight:600; }
+.saying .gr{ color:var(--vert); font-weight:600; }
+
+/* ---------- passo a passo ---------- */
+.stepper{
+  display:flex; flex-direction:column; gap:9px;
+  padding-bottom:16px; border-bottom:1px solid var(--rule);
+}
+.step-dots{ display:flex; gap:5px; }
+.step-dots button{
+  flex:1; height:7px; padding:0; border:none; border-radius:4px;
+  background:var(--rule); cursor:pointer;
+}
+.step-dots button[aria-current="true"]{ background:var(--accent); }
+.step-dots button:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+.step-nav{ display:flex; gap:8px; align-items:center; }
+.step-nav .count{
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.72rem; color:var(--ink-soft); margin-left:auto;
+  font-variant-numeric:tabular-nums;
+}
+
+/* ---------- controles ---------- */
+.controls{ display:flex; flex-direction:column; gap:15px; min-width:0; }
+.ctrl{ display:flex; flex-direction:column; gap:6px; }
+.ctrl > label, .ctrl-title{
+  display:flex; justify-content:space-between; align-items:baseline; gap:10px;
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.74rem; color:var(--ink-soft); margin:0;
+}
+.ctrl > label code, .ctrl-title code{ color:var(--ink); font-weight:700; }
+.ctrl .val{ color:var(--ink); font-weight:500; font-variant-numeric:tabular-nums; }
+
+input[type=range]{
+  -webkit-appearance:none; appearance:none;
+  width:100%; height:22px; background:transparent; margin:0; cursor:pointer;
+}
+input[type=range]::-webkit-slider-runnable-track{ height:3px; background:var(--rule); border-radius:2px; }
+input[type=range]::-moz-range-track{ height:3px; background:var(--rule); border-radius:2px; }
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none; appearance:none;
+  width:15px; height:15px; margin-top:-6px; border-radius:50%;
+  background:var(--accent); border:2px solid var(--panel);
+}
+input[type=range]::-moz-range-thumb{
+  width:15px; height:15px; border-radius:50%;
+  background:var(--accent); border:2px solid var(--panel);
+}
+input[type=range]:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:3px; }
+
+.seg{ display:flex; border:1px solid var(--rule); border-radius:3px; overflow:hidden; }
+.seg button{
+  flex:1; min-width:0;
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.73rem; padding:7px 5px;
+  background:transparent; color:var(--ink-soft);
+  border:none; border-right:1px solid var(--rule); cursor:pointer;
+}
+.seg button:last-child{ border-right:none; }
+.seg button[aria-pressed="true"]{ background:var(--accent-wash); color:var(--accent); font-weight:700; }
+.seg button:focus-visible{ outline:2px solid var(--accent); outline-offset:-2px; }
+
+.btn-row{ display:flex; flex-wrap:wrap; gap:8px; }
+button.act{
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.76rem; padding:9px 13px;
+  background:var(--ink); color:var(--panel);
+  border:1px solid var(--ink); border-radius:3px; cursor:pointer;
+}
+button.act.ghost{ background:transparent; color:var(--ink); }
+button.act:disabled{ opacity:.35; cursor:default; }
+button.act:focus-visible{ outline:2px solid var(--accent); outline-offset:2px; }
+button.act:not(:disabled):hover{ opacity:.86; }
+
+.checks{ display:flex; flex-direction:column; gap:7px; }
+.checks label{
+  display:flex; align-items:center; gap:8px;
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.74rem; color:var(--ink-soft); cursor:pointer;
+}
+.checks input{ accent-color:var(--accent); width:14px; height:14px; }
+
+/* ---------- leitura de valores ---------- */
+.readout{
+  border-top:1px solid var(--rule); padding-top:12px;
+  display:flex; flex-direction:column; gap:3px;
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.73rem;
+}
+.readout .rlabel{
+  font-size:.68rem; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-soft); margin:0 0 4px;
+}
+.row{ display:flex; justify-content:space-between; gap:10px; align-items:baseline; padding:2px 0; }
+.row span:first-child{ color:var(--ink-soft); min-width:0; overflow-wrap:anywhere; }
+.row span:last-child{ color:var(--ink); font-variant-numeric:tabular-nums; white-space:nowrap; }
+.row code{
+  font-family:inherit; font-weight:700; color:var(--ink);
+  background:var(--stage); padding:1px 5px; border-radius:3px;
+}
+.row em{
+  display:block; font-style:normal; font-size:.9em;
+  color:var(--ink-soft); opacity:.85; margin-top:2px;
+}
+.row.mark span:last-child{ color:var(--accent); font-weight:700; }
+.row.magnet span:last-child{ color:var(--magnet); font-weight:700; }
+.row.perp span:last-child{ color:var(--perp); font-weight:700; }
+.row.h span:last-child{ color:var(--horiz); font-weight:700; }
+.row.v span:last-child{ color:var(--vert); font-weight:700; }
+.rsep{ height:1px; background:var(--rule); margin:8px 0; }
+
+.aside{
+  border-left:3px solid var(--rule);
+  padding:2px 0 2px 18px;
+  display:flex; flex-direction:column; gap:8px;
+}
+.aside-title{
+  margin:0;
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.68rem; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-soft);
+}
+.aside-list{
+  margin:0; padding:0; list-style:none;
+  display:grid; grid-template-columns:repeat(auto-fit, minmax(230px, 1fr));
+  gap:12px 26px;
+}
+.aside-list li{ font-size:.97rem; line-height:1.5; color:var(--ink-soft); max-width:46ch; }
+.aside-list b{ color:var(--ink); font-weight:600; }
+.aside-list code, .bench-head code{
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.86em; color:var(--accent);
+}
+
+/* ---------- divisor de parte ---------- */
+.act{
+  display:flex; flex-direction:column; gap:10px;
+  padding-top:22px; margin-top:8px;
+  border-top:3px solid var(--ink);
+}
+.act h2{
+  margin:0;
+  font-family:"Archivo", Arial, sans-serif;
+  font-weight:700; font-size:clamp(1.6rem, 4vw, 2.2rem);
+  letter-spacing:-.02em; line-height:1.1;
+}
+.act p:last-child{ margin:0; max-width:64ch; color:var(--ink-soft); font-size:1.05rem; }
+.act b{ color:var(--ink); font-weight:600; }
+
+input[type=text]{
+  width:100%; padding:8px 10px;
+  font-family:"JetBrains Mono", ui-monospace, monospace; font-size:.8rem;
+  color:var(--ink); background:var(--stage);
+  border:1px solid var(--rule); border-radius:3px;
+}
+input[type=text]:focus-visible{ outline:2px solid var(--accent); outline-offset:1px; }
+
+/* ---------- dicionário ---------- */
+.table-wrap{ overflow-x:auto; }
+table.dict{
+  width:100%; border-collapse:collapse; min-width:520px;
+  font-size:.95rem;
+}
+table.dict th{
+  text-align:left; padding:0 14px 9px 0;
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.68rem; letter-spacing:.12em; text-transform:uppercase;
+  color:var(--ink-soft); font-weight:500;
+  border-bottom:1px solid var(--rule); white-space:nowrap;
+}
+table.dict td{
+  padding:11px 14px 11px 0; vertical-align:top;
+  border-bottom:1px solid var(--rule); color:var(--ink-soft); line-height:1.45;
+}
+table.dict tr:last-child td{ border-bottom:none; }
+table.dict td:first-child{ white-space:nowrap; }
+table.dict td:last-child{
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.76rem; white-space:nowrap; color:var(--ink-soft);
+}
+table.dict code{
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.88em; font-weight:700; color:var(--accent);
+  background:var(--stage); padding:2px 6px; border-radius:3px;
+}
+table.dict td:not(:first-child) code{
+  font-weight:400; background:transparent; padding:0;
+}
+
+.codenote{
+  margin:0; padding-top:14px; border-top:1px solid var(--rule);
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.73rem; color:var(--ink-soft); line-height:1.7;
+}
+.codenote code{ color:var(--accent); }
+
+/* ---------- diagrama da troca (bancada 2) ---------- */
+.swap{
+  display:grid;
+  grid-template-columns:1fr 74px 1fr;
+  column-gap:0; row-gap:9px;
+  border:1px solid var(--rule); border-radius:3px;
+  padding:16px 14px; background:var(--stage);
+}
+.swap .t-left{ grid-column:1; grid-row:1; }
+.swap .t-right{ grid-column:3; grid-row:1; }
+.swap .a-h{ grid-column:1; grid-row:2; }
+.swap .a-v{ grid-column:1; grid-row:3; }
+.swap .b-h{ grid-column:3; grid-row:2; }
+.swap .b-v{ grid-column:3; grid-row:3; }
+.swap-lines{ grid-column:2; grid-row:2 / 4; width:100%; height:100%; align-self:stretch; }
+.minus-badge{ grid-column:3; grid-row:4; justify-self:start; }
+.swap-caption{ grid-column:1 / -1; grid-row:5; }
+@media (max-width:560px){
+  .swap{ grid-template-columns:1fr; }
+  .swap-lines{ display:none; }
+  .swap .t-right{ grid-column:1; grid-row:4; margin-top:8px; }
+  .swap .b-h{ grid-column:1; grid-row:5; }
+  .swap .b-v{ grid-column:1; grid-row:6; }
+  .minus-badge{ grid-column:1; grid-row:7; }
+  .swap-caption{ grid-row:8; }
+}
+.slot-title{
+  margin:0;
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.68rem; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-soft);
+}
+.slot{
+  display:flex; justify-content:space-between; align-items:center; gap:8px;
+  padding:9px 11px; border-radius:3px; background:var(--panel);
+  border:1px solid var(--rule);
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+}
+.slot .k{ font-size:.72rem; color:var(--ink-soft); }
+.slot .v{ font-size:1.05rem; font-weight:700; font-variant-numeric:tabular-nums; }
+.slot.is-h{ border-left:4px solid var(--horiz); }
+.slot.is-v{ border-left:4px solid var(--vert); }
+.slot.is-h .v{ color:var(--horiz); }
+.slot.is-v .v{ color:var(--vert); }
+.swap-lines{ width:78px; height:auto; display:block; }
+.minus-badge{
+  display:inline-block; margin-top:8px;
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.72rem; padding:4px 8px; border-radius:20px;
+  background:var(--accent-wash); color:var(--accent); font-weight:700;
+}
+.minus-badge.off{ background:transparent; color:var(--ink-soft); text-decoration:line-through; font-weight:400; }
+.swap-caption{
+  grid-column:1 / -1; margin:14px 0 0; padding-top:12px;
+  border-top:1px solid var(--rule);
+  font-size:.97rem; color:var(--ink-soft); line-height:1.5;
+}
+.swap-caption b{ color:var(--ink); font-weight:600; }
+
+/* ---------- pistas da bancada 3 ---------- */
+.tracks{ display:flex; flex-direction:column; gap:14px; }
+.track{ display:flex; flex-direction:column; gap:5px; }
+.track-label{
+  margin:0;
+  font-family:"JetBrains Mono", ui-monospace, monospace;
+  font-size:.72rem; color:var(--ink-soft);
+  display:flex; justify-content:space-between; gap:10px;
+}
+.rail{
+  position:relative; height:26px;
+  border-top:1px solid var(--rule); border-bottom:1px solid var(--rule);
+  background:var(--stage);
+}
+.rail::after{ content:""; position:absolute; right:0; top:0; bottom:0; width:1px; background:var(--rule); }
+.trail{ position:absolute; left:0; top:50%; height:3px; margin-top:-1.5px; width:0; background:var(--accent); opacity:.35; }
+.puck{
+  position:absolute; top:50%; left:0; width:12px; height:12px; margin:-6px 0 0 -6px;
+  border-radius:50%; background:var(--accent);
+}
+.track.robo .puck, .track.robo .trail{ background:var(--robot); }
+.track.robo .track-label b{ color:var(--robot); }
+.track.humano .track-label b{ color:var(--accent); }
+.track-label b{ font-weight:700; }
+
+footer{
+  color:var(--ink-soft); font-size:.92rem; max-width:64ch;
+  border-top:1px solid var(--rule); padding-top:18px;
+}
+footer code{ font-family:"JetBrains Mono", ui-monospace, monospace; font-size:.85em; color:var(--accent); }
+
+@media (prefers-reduced-motion: reduce){
+  *{ animation-duration:.001ms !important; transition-duration:.001ms !important; }
+}
+</style>
+</head>
+<body>
+
+
+<div class="page">
+
+  <header class="lede">
+    <p class="eyebrow">human_sync.py &middot; bancada de testes</p>
+    <h1>Anatomia do human_sync</h1>
+    <p class="sub">A <b>parte 1</b> desmonta o movimento do cursor, que começa com <strong>dois números</strong>: quanto o mouse anda de lado e quanto anda para baixo. A <b>parte 2</b> cobre o resto da classe — onde o clique cai, como a página rola, o tempo do botão e o ritmo das teclas.</p>
+    <ul class="keycolors">
+      <li class="kh"><b>azul</b> = quanto anda de lado</li>
+      <li class="kv"><b>verde</b> = quanto anda para baixo</li>
+      <li class="ka"><b>laranja</b> = o caminho do cursor</li>
+    </ul>
+    <p class="colornote">As cores acompanham os <em>números</em>, não as direções. Quando o azul aparecer numa posição vertical, é porque aquele número mudou de casa — e é exatamente isso que o giro de 90° faz.</p>
+  </header>
+
+  <!-- ================= BANCADA 1 ================= -->
+  <section class="bench">
+    <div class="bench-head">
+      <p class="recipe">Receita 1 + 2 &middot; do zero até a curva</p>
+      <h2>Montando o movimento, uma peça de cada vez</h2>
+      <p>Use os botões <b>anterior</b> e <b>próximo</b> para ver o desenho ser construído. Cada passo acrescenta uma peça só.</p>
+    </div>
+
+    <div class="bench-body">
+      <div class="stage">
+        <div class="canvas-wrap"><canvas id="c1" aria-label="Diagrama passo a passo do trajeto do mouse entre dois pontos"></canvas></div>
+        <p class="saying" id="say1"><span class="n">1/7</span><span></span></p>
+        <p class="hint">Arraste os círculos <b>início</b> e <b>destino</b> a qualquer momento.</p>
+      </div>
+
+      <div class="controls">
+        <div class="stepper">
+          <div class="step-dots" id="dots1" role="group" aria-label="passos da bancada 1"></div>
+          <div class="step-nav">
+            <button type="button" class="act ghost" id="b1-prev">◀ anterior</button>
+            <button type="button" class="act" id="b1-next">próximo ▶</button>
+            <span class="count" id="cnt1">1 / 7</span>
+          </div>
+        </div>
+
+        <div class="ctrl">
+          <label for="i1-bend"><code>bend</code> <span class="val" id="v1-bend">60 px</span></label>
+          <input type="range" id="i1-bend" min="0" max="180" value="60" step="1">
+        </div>
+
+        <div class="ctrl">
+          <p class="ctrl-title" id="lbl-lado"><span>o lado sorteado, dentro de <code>off</code></span></p>
+          <div class="seg" role="group" aria-labelledby="lbl-lado">
+            <button type="button" id="i1-lado-neg" aria-pressed="false">−1</button>
+            <button type="button" id="i1-lado-pos" aria-pressed="true">+1</button>
+          </div>
+        </div>
+
+        <div class="ctrl">
+          <label for="i1-prog"><code>i / steps</code> <span class="val" id="v1-prog">50 %</span></label>
+          <input type="range" id="i1-prog" min="0" max="100" value="50" step="1">
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="act" id="i1-play">▶ animar</button>
+          <button type="button" class="act ghost" id="i1-roll">sortear</button>
+        </div>
+
+        <div class="readout">
+          <p class="rlabel">os nomes reais, do human_sync.py</p>
+          <div class="row h"><span><code>dx</code><em>quanto anda de lado</em></span><span id="r1-dh">—</span></div>
+          <div class="row v"><span><code>dy</code><em>quanto anda para baixo</em></span><span id="r1-dv">—</span></div>
+          <div class="rsep"></div>
+          <div class="row"><span><code>length</code><em>a distância em linha reta</em></span><span id="r1-comp">—</span></div>
+          <div class="row"><span><code>mx, my</code><em>o meio do caminho</em></span><span id="r1-meio">—</span></div>
+          <div class="row perp"><span><code>nx, ny</code><em>a direção "para o lado"</em></span><span id="r1-lado">—</span></div>
+          <div class="row"><span><code>off</code><em>o empurrão, com o lado sorteado</em></span><span id="r1-desl">—</span></div>
+          <div class="row magnet"><span><code>ctrl</code><em>o ponto ímã</em></span><span id="r1-ima">—</span></div>
+          <div class="rsep"></div>
+          <div class="row"><span><code>t</code><em>progresso já suavizado</em></span><span id="r1-ts">—</span></div>
+          <div class="row mark"><span><code>p</code><em>onde o cursor está agora</em></span><span id="r1-pos">—</span></div>
+          <div class="row"><span>a barriga, fora da reta<em>não tem nome no código</em></span><span id="r1-barriga">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="codenote">No arquivo: <code>_control_point()</code> faz os passos 3 a 5; <code>_bezier()</code> faz os passos 6 e 7. Os dois são chamados de dentro de <code>move_to()</code>.</p>
+  </section>
+
+  <!-- ================= BANCADA 2: POR QUÊ ================= -->
+  <section class="bench">
+    <div class="bench-head">
+      <p class="recipe">Receita 1, etapa 4 &middot; por que girar</p>
+      <h2>"Para o lado" depende de para onde você está indo</h2>
+      <p>Antes de ver <em>como</em> o giro funciona, vale entender <em>por que</em> ele existe. Aqui estão dois jeitos de empurrar o meio do caminho: um empurrão <b>sempre para baixo</b> e o empurrão <b>perpendicular</b>. Gire o movimento e veja qual dos dois aguenta.</p>
+    </div>
+
+    <div class="bench-body">
+      <div class="stage">
+        <div class="canvas-wrap"><canvas id="c4" aria-label="Comparação entre um empurrão fixo para baixo e um empurrão perpendicular, em várias direções de movimento"></canvas></div>
+        <p class="saying" id="say4"><span class="n">1/5</span><span></span></p>
+        <p class="hint">Gire a direção do movimento e acompanhe as duas barrigas.</p>
+      </div>
+
+      <div class="controls">
+        <div class="stepper">
+          <div class="step-dots" id="dots4" role="group" aria-label="passos da bancada por que girar"></div>
+          <div class="step-nav">
+            <button type="button" class="act ghost" id="b4-prev">◀ anterior</button>
+            <button type="button" class="act" id="b4-next">próximo ▶</button>
+            <span class="count" id="cnt4">1 / 5</span>
+          </div>
+        </div>
+
+        <div class="ctrl">
+          <label for="i4-ang">direção do movimento <span class="val" id="v4-ang">0°</span></label>
+          <input type="range" id="i4-ang" min="0" max="180" value="0" step="1">
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="act" id="i4-spin">▶ girar o movimento</button>
+        </div>
+
+        <div class="readout">
+          <p class="rlabel">o que cada empurrão entrega</p>
+          <div class="row"><span>empurrão total</span><span id="r4-push">60 px</span></div>
+          <div class="rsep"></div>
+          <div class="row magnet"><span>fixo → vira curva</span><span id="r4-fix-ok">—</span></div>
+          <div class="row"><span>fixo → desperdiçado</span><span id="r4-fix-lost">—</span></div>
+          <div class="row magnet"><span>barriga do fixo</span><span id="r4-fix-b">—</span></div>
+          <div class="rsep"></div>
+          <div class="row perp"><span>perpendicular → vira curva</span><span id="r4-pp-ok">—</span></div>
+          <div class="row"><span>perpendicular → desperdiçado</span><span id="r4-pp-lost">—</span></div>
+          <div class="row mark"><span>barriga do perpendicular</span><span id="r4-pp-b">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aside">
+      <p class="aside-title">onde mais esse giro aparece</p>
+      <ul class="aside-list">
+        <li><b>Desviar de um buraco na calçada.</b> Você dá dois passos para o lado e volta ao rumo. "O lado" muda conforme a direção em que você caminha — é a mesma conta.</li>
+        <li><b>A espessura de um traço.</b> Quando um programa desenha uma linha grossa, ele engorda a linha <em>para os lados dela</em>. Numa linha inclinada, "os lados" são a perpendicular.</li>
+        <li><b>A faixa ao lado na estrada.</b> A faixa vizinha acompanha cada curva mantendo a mesma distância — sempre medida na perpendicular, nunca "sempre 3 metros para o norte".</li>
+        <li><b>A seta de um gráfico.</b> As duas pontinhas da cabeça da seta saem para os lados da haste, então precisam girar junto com ela.</li>
+      </ul>
+    </div>
+
+    <p class="codenote">No arquivo: é exatamente o que as linhas <code>nx, ny = -dy / length, dx / length</code> resolvem — dar ao código um "para o lado" que funciona em qualquer direção de movimento.</p>
+  </section>
+
+  <!-- ================= BANCADA 3: COMO ================= -->
+  <section class="bench">
+    <div class="bench-head">
+      <p class="recipe">Receita 1, etapa 4 &middot; como girar</p>
+      <h2>Os dois números trocando de casa</h2>
+      <p>Girar uma seta 90° não é uma conta complicada: é pegar os dois números que ela já tem e colocá-los na casa um do outro. Siga os passos e acompanhe as cores.</p>
+    </div>
+
+    <div class="bench-body">
+      <div class="stage">
+        <div class="canvas-wrap"><canvas id="c2" aria-label="Diagrama passo a passo do giro de noventa graus de uma seta"></canvas></div>
+        <p class="saying" id="say2"><span class="n">1/6</span><span></span></p>
+
+        <div class="swap" id="swapbox">
+          <p class="slot-title t-left">a seta original</p>
+          <div class="slot is-h a-h"><span class="k">de lado &middot; <code>dx</code></span><span class="v" id="sw-a-h">150</span></div>
+          <div class="slot is-v a-v"><span class="k">pra baixo &middot; <code>dy</code></span><span class="v" id="sw-a-v">60</span></div>
+
+          <svg class="swap-lines" viewBox="0 0 74 100" preserveAspectRatio="none" role="img" aria-label="Linhas cruzadas mostrando os dois números trocando de posição">
+            <path d="M3 24 C 30 24, 44 76, 71 76" fill="none" stroke="var(--horiz)" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+            <path d="M3 76 C 30 76, 44 24, 71 24" fill="none" stroke="var(--vert)" stroke-width="3" stroke-linecap="round" vector-effect="non-scaling-stroke"></path>
+          </svg>
+
+          <p class="slot-title t-right">depois do giro</p>
+          <div class="slot is-v b-h"><span class="k">de lado &middot; <code>nx</code></span><span class="v" id="sw-b-h">−60</span></div>
+          <div class="slot is-h b-v"><span class="k">pra baixo &middot; <code>ny</code></span><span class="v" id="sw-b-v">150</span></div>
+          <span class="minus-badge" id="minusbadge">↑ o menos entra aqui</span>
+
+          <p class="swap-caption" id="swapcap">O <b>verde</b> saiu da casa de baixo e foi para a casa de cima; o <b>azul</b> fez o contrário. Só isso já é o giro.</p>
+        </div>
+
+        <p class="hint">Arraste a ponta da seta escura para testar com outros números.</p>
+      </div>
+
+      <div class="controls">
+        <div class="stepper">
+          <div class="step-dots" id="dots2" role="group" aria-label="passos da bancada 2"></div>
+          <div class="step-nav">
+            <button type="button" class="act ghost" id="b2-prev">◀ anterior</button>
+            <button type="button" class="act" id="b2-next">próximo ▶</button>
+            <span class="count" id="cnt2">1 / 6</span>
+          </div>
+        </div>
+
+        <div class="ctrl">
+          <p class="ctrl-title" id="lbl-modo">a fórmula usada</p>
+          <div class="seg" role="group" aria-labelledby="lbl-modo">
+            <button type="button" id="i2-giro" aria-pressed="true">com o menos</button>
+            <button type="button" id="i2-esp" aria-pressed="false">sem o menos</button>
+          </div>
+        </div>
+
+        <div class="ctrl">
+          <p class="ctrl-title">setas prontas</p>
+          <div class="seg" role="group" aria-label="setas prontas">
+            <button type="button" class="preset" data-dir="dir">→</button>
+            <button type="button" class="preset" data-dir="bai">↓</button>
+            <button type="button" class="preset" data-dir="esq">←</button>
+            <button type="button" class="preset" data-dir="cim">↑</button>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="act" id="i2-apply">girar de novo ↻</button>
+          <button type="button" class="act ghost" id="i2-clear">limpar rastro</button>
+        </div>
+
+        <div class="readout">
+          <p class="rlabel">a conta, número a número</p>
+          <div class="row h"><span><code>dx</code><em>de lado</em></span><span id="r2-dh">—</span></div>
+          <div class="row v"><span><code>dy</code><em>para baixo</em></span><span id="r2-dv">—</span></div>
+          <div class="rsep"></div>
+          <div class="row v"><span><code id="r2-fx">-dy</code><em>vira o novo "de lado"</em></span><span id="r2-lx">—</span></div>
+          <div class="row h"><span><code>dx</code><em>vira o novo "para baixo"</em></span><span id="r2-ly">—</span></div>
+          <div class="rsep"></div>
+          <div class="row"><span>ângulo entre as setas</span><span id="r2-ang">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="codenote">No arquivo: <code>nx, ny = -dy / length, dx / length</code>. Os valores acima mostram a troca crua (<code>-dy</code> e <code>dx</code>); a divisão por <code>length</code> vem depois e só encolhe a seta até o tamanho 1, para virar bússola. O giro em si é a troca com o menos.</p>
+  </section>
+
+  <!-- ================= BANCADA 3 ================= -->
+  <section class="bench">
+    <div class="bench-head">
+      <p class="recipe">Receita 3 &middot; a suavização</p>
+      <h2>O relógio anda parelho; o cursor, não</h2>
+      <p>Os passos acontecem em intervalos iguais de tempo, mas o tanto de caminho que cada passo cobre muda. É por isso que o movimento arranca devagar, dispara no meio e chega freando.</p>
+    </div>
+
+    <div class="bench-body">
+      <div class="stage">
+        <div class="canvas-wrap"><canvas id="c3" aria-label="Gráfico comparando o tempo do relógio com o caminho percorrido"></canvas></div>
+        <p class="hint">Eixo de baixo: tempo que passou. Eixo da esquerda: caminho andado. A diagonal cinza é o robô.</p>
+      </div>
+
+      <div class="controls">
+        <div class="ctrl">
+          <label for="i3-prog"><code>i / steps</code> <span class="val" id="v3-prog">50 %</span></label>
+          <input type="range" id="i3-prog" min="0" max="100" value="50" step="1">
+        </div>
+
+        <div class="tracks">
+          <div class="track robo">
+            <p class="track-label"><b>robô</b><span id="t3-robo">50 %</span></p>
+            <div class="rail"><div class="trail" id="tr3-robo"></div><div class="puck" id="p3-robo"></div></div>
+          </div>
+          <div class="track humano">
+            <p class="track-label"><b>humano</b><span id="t3-hum">50 %</span></p>
+            <div class="rail"><div class="trail" id="tr3-hum"></div><div class="puck" id="p3-hum"></div></div>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="act" id="i3-play">▶ soltar os dois</button>
+        </div>
+
+        <div class="readout">
+          <p class="rlabel">o que entra → o que sai</p>
+          <div class="row"><span>10 % do tempo</span><span>2 % do caminho</span></div>
+          <div class="row"><span>25 % do tempo</span><span>12,5 % do caminho</span></div>
+          <div class="row"><span>50 % do tempo</span><span>50 % do caminho</span></div>
+          <div class="row"><span>75 % do tempo</span><span>87,5 % do caminho</span></div>
+          <div class="row"><span>90 % do tempo</span><span>98 % do caminho</span></div>
+          <div class="rsep"></div>
+          <div class="row mark"><span>agora</span><span id="r3-now">—</span></div>
+          <div class="row"><span>velocidade agora</span><span id="r3-vel">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="codenote">No arquivo: <code>_ease_in_out()</code>, chamada como <code>t = self._ease_in_out(i / steps)</code>. Entre 25 % e 50 % do relógio o cursor avança 37 pontos; entre 75 % e 90 %, só 10.</p>
+
+    <div class="aside">
+      <p class="aside-title">o que este gráfico não mostra</p>
+      <ul class="aside-list">
+        <li><b>A espera entre os passos não é fixa.</b> O <code>irregular_intervals()</code> sorteia cada intervalo numa gaussiana em torno de 12 ms, e em 20 % das vezes tria um passo "lento", com o triplo da espera. A curva em S é a forma de fundo; por cima dela existe essa irregularidade.</li>
+        <li><b>A duração total não é escolhida.</b> Ela é consequência: quantos passos couberam na distância, vezes o que cada intervalo sorteou. Não existe mais um parâmetro <code>duracao</code>.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- ================= BANCADA 5: DENTRO DO move_to() ================= -->
+  <section class="bench">
+    <div class="bench-head">
+      <p class="recipe">move_to() &middot; do esqueleto ao traçado real</p>
+      <h2>A Bézier é o esqueleto, não o caminho final</h2>
+      <p>As bancadas acima param na curva lisa. Mas o que chega em <code>page.mouse.move()</code> tem mais três camadas por cima dela — e são elas que separam "uma curva bonita" de "parece uma pessoa". Avance os passos para empilhá-las uma a uma.</p>
+    </div>
+
+    <div class="bench-body">
+      <div class="stage">
+        <div class="canvas-wrap"><canvas id="c5" aria-label="O trajeto do mouse com passos discretos, tremor e overshoot somados à curva"></canvas></div>
+        <p class="saying" id="say5"><span class="n">1/5</span><span></span></p>
+        <div class="canvas-wrap"><canvas id="c5b" aria-label="Linha do tempo comparando as esperas sorteadas com esperas iguais"></canvas></div>
+        <p class="hint">O tremor e o overshoot estão <b>exagerados na tela</b> (8× e 6×) — no código são de meio pixel e de três pixels, invisíveis nesta escala.</p>
+      </div>
+
+      <div class="controls">
+        <div class="stepper">
+          <div class="step-dots" id="dots5" role="group" aria-label="passos da bancada move_to"></div>
+          <div class="step-nav">
+            <button type="button" class="act ghost" id="b5-prev">◀ anterior</button>
+            <button type="button" class="act" id="b5-next">próximo ▶</button>
+            <span class="count" id="cnt5">1 / 5</span>
+          </div>
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="act" id="i5-play">▶ executar os dois</button>
+          <button type="button" class="act ghost" id="i5-roll">novo sorteio</button>
+        </div>
+
+        <div class="readout">
+          <p class="rlabel">esta execução, sorteada</p>
+          <div class="row"><span><code>dist</code><em>distância em linha reta</em></span><span id="r5-dist">—</span></div>
+          <div class="row"><span><code>steps</code><em>em quantos pedaços foi partida</em></span><span id="r5-steps">—</span></div>
+          <div class="row"><span><code>bend</code><em>15 % a 35 % da distância</em></span><span id="r5-bend">—</span></div>
+          <div class="rsep"></div>
+          <div class="row"><span>passos lentos<em>os 20 % com o triplo da espera</em></span><span id="r5-slow">—</span></div>
+          <div class="row mark"><span>duração real<em>soma de todos os <code>gaps</code></em></span><span id="r5-treal">—</span></div>
+          <div class="row"><span>se as esperas fossem iguais<em>12 ms cada</em></span><span id="r5-tideal">—</span></div>
+          <div class="rsep"></div>
+          <div class="row"><span>overshoot nesta execução<em>acontece em 35 % das vezes</em></span><span id="r5-over">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aside">
+      <p class="aside-title">por que cada camada existe</p>
+      <ul class="aside-list">
+        <li><b>Os passos.</b> Um mouse físico não desliza: ele reporta sua posição em intervalos, e o sistema recebe uma sequência de saltinhos. Uma linha contínua perfeita não é o que um mouse de verdade produz.</li>
+        <li><b>O tremor.</b> Nenhuma mão segue uma fórmula. Meio pixel de ruído a cada ponto quebra a regularidade matemática que sobraria de uma curva calculada.</li>
+        <li><b>O overshoot.</b> Quando a gente mira rápido, passa do alvo e corrige. É consequência de inércia — o braço tem massa e não freia no lugar exato.</li>
+        <li><b>As esperas desiguais.</b> Atenção não é constante. O <code>irregular_intervals()</code> sorteia cada espera e, em 20 % delas, triplica — um "engasgo" no meio do movimento.</li>
+      </ul>
+    </div>
+
+    <p class="codenote">No arquivo: tudo isso está dentro de <code>move_to()</code>, no laço <code>for i in range(1, steps + 1)</code> e nas linhas logo depois dele.</p>
+  </section>
+
+  <!-- ================= PARTE 2 ================= -->
+  <header class="act">
+    <p class="eyebrow">parte 2</p>
+    <h2>O resto da classe</h2>
+    <p>Mover o cursor é metade do arquivo. A outra metade decide <b>onde</b> clicar, <b>como chegar lá</b>, <b>quanto tempo</b> segurar o botão e <b>em que ritmo</b> digitar. São quatro problemas diferentes, e cada um tem um sorteio próprio.</p>
+  </header>
+
+  <!-- ================= B6: ONDE O CLIQUE CAI ================= -->
+  <section class="bench">
+    <div class="bench-head">
+      <p class="recipe">move_to_element() &middot; a mira</p>
+      <h2>Ninguém clica duas vezes no mesmo pixel</h2>
+      <p>O código nunca mira no centro do elemento. Ele sorteia um ponto na faixa central — entre 35 % e 65 % da largura e da altura — e é diferente a cada clique. Aumente a quantidade de cliques e veja a nuvem se formar.</p>
+    </div>
+
+    <div class="bench-body">
+      <div class="stage">
+        <div class="canvas-wrap"><canvas id="c6" aria-label="Nuvem de pontos de clique dentro da faixa central de um botão"></canvas></div>
+        <p class="hint">A área sombreada é a faixa sorteável. O ponto cinza no meio é onde um robô clicaria, sempre.</p>
+      </div>
+
+      <div class="controls">
+        <div class="ctrl">
+          <label for="i6-n">quantos cliques <span class="val" id="v6-n">120</span></label>
+          <input type="range" id="i6-n" min="1" max="400" value="120" step="1">
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="act ghost" id="i6-roll">sortear de novo</button>
+        </div>
+
+        <div class="readout">
+          <p class="rlabel">a linha que decide</p>
+          <div class="row"><span><code>0.35 + random() * 0.3</code><em>a fração do elemento, em cada eixo</em></span><span></span></div>
+          <div class="rsep"></div>
+          <div class="row"><span>faixa na largura<em>o botão tem 260 px</em></span><span id="r6-fx">—</span></div>
+          <div class="row"><span>faixa na altura<em>o botão tem 80 px</em></span><span id="r6-fy">—</span></div>
+          <div class="row mark"><span>pixels distintos usados<em>de <span id="r6-n2">120</span> cliques</em></span><span id="r6-uniq">—</span></div>
+          <div class="row"><span>margem nunca tocada<em>as bordas do elemento</em></span><span id="r6-marg">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="codenote">No arquivo: <code>x = box["x"] + box["width"] * (0.35 + random.random() * 0.3)</code>, e o mesmo para <code>y</code>. Logo depois vem um <code>min/max</code> que prende o ponto a 3 px das bordas da janela — proteção para elementos que ficam meio para fora da tela.</p>
+  </section>
+
+  <!-- ================= B7: A ROLAGEM ================= -->
+  <section class="bench">
+    <div class="bench-head">
+      <p class="recipe">bring_into_view() &middot; a rolagem</p>
+      <h2>Rolar até o elemento aparecer, sem cair no exagero</h2>
+      <p>O elemento pode estar fora da tela. Em vez de saltar direto para ele, o código rola em pedaços e mira numa <b>faixa de pouso</b>: entre 30 % e 45 % da altura da janela. Nem no topo, nem no centro exato — onde uma pessoa naturalmente para de rolar.</p>
+    </div>
+
+    <div class="bench-body">
+      <div class="stage">
+        <div class="canvas-wrap"><canvas id="c7" aria-label="Página rolando atrás de uma janela até o elemento alvo entrar na faixa de pouso"></canvas></div>
+        <p class="hint">A moldura escura é a janela do navegador. A faixa listrada é onde o código quer que o elemento pare.</p>
+      </div>
+
+      <div class="controls">
+        <div class="ctrl">
+          <label for="i7-pos">onde o elemento está na página <span class="val" id="v7-pos">2400 px</span></label>
+          <input type="range" id="i7-pos" min="900" max="4200" value="2400" step="10">
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="act" id="i7-play">▶ rolar até achar</button>
+          <button type="button" class="act ghost" id="i7-reset">voltar ao topo</button>
+        </div>
+
+        <div class="readout">
+          <p class="rlabel">a volta do laço</p>
+          <div class="row"><span>voltas dadas<em>o laço tenta no máximo 8</em></span><span id="r7-iter">—</span></div>
+          <div class="row"><span><code>passo</code><em>preso entre −700 e +700 px</em></span><span id="r7-passo">—</span></div>
+          <div class="row"><span>espera entre as voltas<em>sorteada, 90 a 260 ms</em></span><span id="r7-wait">—</span></div>
+          <div class="rsep"></div>
+          <div class="row mark"><span>estado<em>onde o elemento parou</em></span><span id="r7-state">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aside">
+      <p class="aside-title">os dois detalhes que importam</p>
+      <ul class="aside-list">
+        <li><b>O teto de 700 px.</b> Um giro de roda de mouse move algumas centenas de pixels. Rolar 3 000 px de uma vez não é um gesto que exista — por isso o <code>max(-700, min(700, dy))</code>.</li>
+        <li><b>O alvo móvel.</b> A mira é <code>0.30 + random() * 0.15</code> da altura da janela, sorteada a cada volta. Duas execuções nunca param o elemento na mesma altura.</li>
+        <li><b>A saída de emergência.</b> Se depois de 8 voltas ainda não deu certo, o código chama <code>scroll_into_view_if_needed()</code> e aceita o resultado. É a rede de segurança para casos estranhos, tipo elemento dentro de um contêiner com rolagem própria.</li>
+      </ul>
+    </div>
+
+    <p class="codenote">No arquivo: o laço <code>for _ in range(8)</code> dentro de <code>bring_into_view()</code>, com <code>_dentro()</code> decidindo se já deu.</p>
+  </section>
+
+  <!-- ================= B8: O CLIQUE ================= -->
+  <section class="bench">
+    <div class="bench-head">
+      <p class="recipe">click() &middot; o tempo do botão</p>
+      <h2>Um clique não é um instante</h2>
+      <p>Entre chegar no elemento e soltar o botão passam duas esperas que o robô não tem: uma pausa antes de apertar, e o tempo com o botão pressionado. São dezenas de milissegundos que qualquer detector consegue medir.</p>
+    </div>
+
+    <div class="bench-body">
+      <div class="stage">
+        <div class="canvas-wrap"><canvas id="c8" aria-label="Linha do tempo de um clique humano comparada com um clique instantâneo"></canvas></div>
+        <p class="hint">Cada sorteio dá números diferentes — aperte várias vezes para ver as faixas.</p>
+      </div>
+
+      <div class="controls">
+        <div class="btn-row">
+          <button type="button" class="act" id="i8-roll">sortear um clique</button>
+        </div>
+
+        <div class="readout">
+          <p class="rlabel">esta execução</p>
+          <div class="row"><span><code>click_pre_ms</code><em>parado sobre o alvo, antes de apertar</em></span><span id="r8-pre">—</span></div>
+          <div class="row"><span><code>click_hold_ms</code><em>com o botão pressionado</em></span><span id="r8-hold">—</span></div>
+          <div class="rsep"></div>
+          <div class="row mark"><span>total do clique</span><span id="r8-tot">—</span></div>
+          <div class="row"><span>o mesmo, num robô<em>down e up no mesmo instante</em></span><span>0 ms</span></div>
+          <div class="rsep"></div>
+          <div class="row"><span>faixa do <code>pre</code></span><span>90 a 250 ms</span></div>
+          <div class="row"><span>faixa do <code>hold</code></span><span>70 a 130 ms</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="codenote">No arquivo: <code>mouse.down()</code>, <code>sleep_ms(...)</code>, <code>mouse.up()</code> — três chamadas separadas. Um <code>page.click()</code> comum faria as duas de uma vez, com zero entre elas.</p>
+  </section>
+
+  <!-- ================= B9: A DIGITAÇÃO ================= -->
+  <section class="bench">
+    <div class="bench-head">
+      <p class="recipe">type() + human_delay() &middot; o ritmo</p>
+      <h2>O intervalo entre teclas tem cauda longa</h2>
+      <p>Aqui está a parte mais sutil do arquivo. O <code>human_delay()</code> não sorteia um número qualquer entre 90 e 240 ms — ele parte do mínimo e soma uma meia-gaussiana, criando uma <b>cauda longa</b> à direita. É o que faz a variação bater com a de gente de verdade.</p>
+    </div>
+
+    <div class="bench-body">
+      <div class="stage">
+        <div class="canvas-wrap"><canvas id="c9" aria-label="Ritmo das teclas ao longo do tempo, com pausas de pensamento"></canvas></div>
+        <div class="canvas-wrap"><canvas id="c9b" aria-label="Histograma comparando a distribuição dos intervalos com uma distribuição uniforme"></canvas></div>
+        <p class="hint">Em cima, uma frase sendo digitada. Embaixo, a distribuição de 4 000 intervalos sorteados.</p>
+      </div>
+
+      <div class="controls">
+        <div class="ctrl">
+          <label for="i9-txt">o texto a digitar</label>
+          <input type="text" id="i9-txt" value="Maria Eduarda Alves" maxlength="40">
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="act" id="i9-play">▶ digitar</button>
+          <button type="button" class="act ghost" id="i9-roll">novo sorteio</button>
+        </div>
+
+        <div class="readout">
+          <p class="rlabel">os intervalos desta frase</p>
+          <div class="row"><span>teclas<em>uma chamada de <code>keyboard.type()</code> cada</em></span><span id="r9-n">—</span></div>
+          <div class="row"><span>intervalo médio</span><span id="r9-med">—</span></div>
+          <div class="row"><span>o mais rápido / o mais lento</span><span id="r9-mm">—</span></div>
+          <div class="row"><span>pausas de pensamento<em>8 % de chance, 400 a 1200 ms</em></span><span id="r9-think">—</span></div>
+          <div class="row mark"><span>tempo total da frase</span><span id="r9-tot">—</span></div>
+          <div class="rsep"></div>
+          <p class="rlabel">a variação, medida</p>
+          <div class="row mark"><span>RSD do <code>human_delay</code><em>desvio padrão ÷ média</em></span><span id="r9-rsd">—</span></div>
+          <div class="row"><span>RSD de um sorteio uniforme<em>na mesma faixa</em></span><span id="r9-rsdu">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="aside">
+      <p class="aside-title">a fórmula, destrinchada</p>
+      <ul class="aside-list">
+        <li><b><code>base = lo + abs(gaussian(0, (hi-lo)/3))</code></b> — o <code>abs</code> é o truque. Ele dobra a metade negativa da curva para o lado positivo, então o intervalo <em>nunca</em> fica abaixo de 90 ms, mas pode passar bem de 240. O resultado se amontoa perto do mínimo e afina para a direita.</li>
+        <li><b>Os 15 % que multiplicam por 1,5 a 2,5×</b> — um segundo sorteio, por cima do primeiro, que joga alguns intervalos bem longe. São os tropeços: a tecla que você procurou no teclado.</li>
+        <li><b>Os 8 % de pausa de pensamento</b> — meio segundo ou mais parado, entre uma tecla e outra. É onde a pessoa conferiu o documento, ou só se distraiu.</li>
+      </ul>
+    </div>
+
+    <p class="codenote">No arquivo: <code>human_delay()</code> e o laço <code>for ch in text</code> dentro de <code>type()</code>. O texto vai tecla por tecla — nunca de uma vez.</p>
+  </section>
+
+  <!-- ================= B10: O WARMUP ================= -->
+  <section class="bench">
+    <div class="bench-head">
+      <p class="recipe">warmup() &middot; o histórico</p>
+      <h2>Chegar com o cursor já aquecido</h2>
+      <p>Uma página recém-aberta em que o cursor salta direto para o botão certo é suspeita: pessoa nenhuma acerta o alvo de primeira, sem antes ter movido o mouse por aí. O <code>warmup</code> gera esse passado — passeios sem destino, cada um deles uma curva completa das bancadas da parte 1.</p>
+    </div>
+
+    <div class="bench-body">
+      <div class="stage">
+        <div class="canvas-wrap"><canvas id="c10" aria-label="Passeio aleatório do cursor pela janela antes da primeira ação"></canvas></div>
+        <p class="hint">Cada trecho é um <code>move_to()</code> inteiro: Bézier, passos, tremor e tudo o mais.</p>
+      </div>
+
+      <div class="controls">
+        <div class="ctrl">
+          <label for="i10-n">quantos movimentos <span class="val" id="v10-n">10</span></label>
+          <input type="range" id="i10-n" min="1" max="24" value="10" step="1">
+        </div>
+
+        <div class="btn-row">
+          <button type="button" class="act ghost" id="i10-roll">novo passeio</button>
+        </div>
+
+        <div class="readout">
+          <p class="rlabel">o passeio</p>
+          <div class="row"><span>salto máximo por vez<em><code>warmup_dx</code>, <code>warmup_dy</code></em></span><span>±220 / ±160 px</span></div>
+          <div class="row"><span>margem das bordas<em>o cursor nunca encosta</em></span><span>60 px</span></div>
+          <div class="row"><span>pausa entre movimentos<em><code>warmup_pause_ms</code></em></span><span>60 a 180 ms</span></div>
+          <div class="rsep"></div>
+          <div class="row"><span>distância percorrida</span><span id="r10-dist">—</span></div>
+          <div class="row mark"><span>tempo até a primeira ação</span><span id="r10-t">—</span></div>
+        </div>
+      </div>
+    </div>
+
+    <p class="codenote">No arquivo: <code>warmup(moves)</code>, chamado logo depois de abrir a página. Repare que ele parte de <code>self._cur</code>, que já nasce num ponto aleatório entre 80 e 400 — o cursor nunca começa em (0, 0).</p>
+  </section>
+
+  <!-- ================= DICIONÁRIO ================= -->
+  <section class="bench">
+    <div class="bench-head">
+      <p class="recipe">human_sync.py &middot; de nome curto para português</p>
+      <h2>O dicionário do arquivo</h2>
+      <p>Os nomes no código são curtos porque quem escreveu já sabia o que eram. Esta é a tradução de cada um — e em que bancada acima ele aparece desenhado.</p>
+    </div>
+
+    <div class="table-wrap">
+      <table class="dict">
+        <thead>
+          <tr><th>no código</th><th>o que é</th><th>onde ver</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>a</code></td><td>o ponto de onde o mouse sai</td><td>bancada 1, passo 1</td></tr>
+          <tr><td><code>b</code></td><td>o ponto para onde ele vai</td><td>bancada 1, passo 1</td></tr>
+          <tr><td><code>dx</code>, <code>dy</code></td><td>quanto anda de lado e quanto anda para baixo — os dois números que geram todo o resto</td><td>bancada 1, passo 3</td></tr>
+          <tr><td><code>length</code></td><td>a distância em linha reta entre os dois pontos, por Pitágoras</td><td>bancada 1, passo 3</td></tr>
+          <tr><td><code>mx</code>, <code>my</code></td><td>o meio do caminho: a média entre as duas pontas</td><td>bancada 1, passo 4</td></tr>
+          <tr><td><code>nx</code>, <code>ny</code></td><td>a direção "para o lado": os dois números trocados de casa e encolhidos até somarem tamanho 1</td><td>bancadas 2 e 3</td></tr>
+          <tr><td><code>bend</code></td><td>o tamanho do empurrão lateral, em pixels. Aqui depende da distância: de 15 % a 35 % dela, com teto de 120</td><td>bancada 1, passo 5</td></tr>
+          <tr><td><code>off</code></td><td>o <code>bend</code> já com o lado sorteado — cara ou coroa entre <code>+1</code> e <code>−1</code></td><td>bancada 1, passo 5</td></tr>
+          <tr><td><code>ctrl</code></td><td>o ponto ímã. Na literatura se chama "ponto de controle" da Bézier — daí o nome</td><td>bancada 1, passo 5</td></tr>
+          <tr><td><code>t</code></td><td>o progresso do trajeto, de 0 a 1, já passado pela suavização</td><td>bancada 4</td></tr>
+          <tr><td><code>u</code></td><td>o quanto falta: <code>1 - t</code></td><td>bancada 1, passo 6</td></tr>
+          <tr><td><code>p</code></td><td>onde o cursor deve estar neste passo</td><td>bancada 1, passo 7</td></tr>
+          <tr><td><code>steps</code></td><td>em quantos pedacinhos o trajeto foi partido — cerca de um passo a cada 6 a 12 px, nunca menos que 12</td><td>bancada 5, passo 2</td></tr>
+          <tr><td><code>gaps</code></td><td>a lista de esperas entre um passo e o outro, cada uma sorteada; 20 % delas saem no triplo</td><td>bancada 5, passo 5</td></tr>
+          <tr><td><code>jx</code>, <code>jy</code></td><td>o tremor somado a cada ponto, para o cursor não cair exatamente em cima da curva</td><td>bancada 5, passo 3</td></tr>
+          <tr><td>o overshoot</td><td>não tem variável própria: são as três linhas depois do laço, que passam do alvo e voltam</td><td>bancada 5, passo 4</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-wrap">
+      <table class="dict">
+        <thead>
+          <tr><th>os ajustes</th><th>o que controlam</th><th>onde ver</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>step_divisor</code></td><td>um passo a cada 6 a 12 px — define quantos <code>steps</code> o trajeto terá</td><td>bancada 5</td></tr>
+          <tr><td><code>bend_frac</code></td><td>o piso da barriga: 15 % da distância, mais até 20 % de sorteio</td><td>bancada 1</td></tr>
+          <tr><td><code>mean_step_ms</code></td><td>os 12 ms de espera média entre um passo e o outro</td><td>bancada 5</td></tr>
+          <tr><td><code>overshoot_p</code></td><td>a chance de passar do alvo e voltar: 0,35</td><td>bancada 5, passo 4</td></tr>
+          <tr><td><code>click_pre_ms</code></td><td>quanto tempo fica parado sobre o alvo antes de apertar</td><td>bancada 8</td></tr>
+          <tr><td><code>click_hold_ms</code></td><td>quanto tempo o botão fica pressionado</td><td>bancada 8</td></tr>
+          <tr><td><code>key_delay_ms</code></td><td>a faixa do intervalo entre teclas, de onde o <code>human_delay</code> parte</td><td>bancada 9</td></tr>
+          <tr><td><code>think_pause_ms</code></td><td>o tamanho da pausa de pensamento, quando ela sai nos 8 %</td><td>bancada 9</td></tr>
+          <tr><td><code>warmup_dx</code>, <code>warmup_dy</code></td><td>o salto máximo de cada passeio do aquecimento</td><td>bancada 10</td></tr>
+          <tr><td><code>_cur</code></td><td>onde o código acha que o cursor está — o navegador não conta, então ele anota</td><td>bancada 10</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="table-wrap">
+      <table class="dict">
+        <thead>
+          <tr><th>as funções</th><th>o que fazem</th><th>onde ver</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>_control_point(a, b, bend)</code></td><td>acha o ponto ímã: pega o meio do caminho e empurra para o lado</td><td>bancadas 1, 2 e 3</td></tr>
+          <tr><td><code>_bezier(a, c, b, t)</code></td><td>responde "num certo instante, onde exatamente está o cursor?"</td><td>bancada 1, passos 6 e 7</td></tr>
+          <tr><td><code>_ease_in_out(t)</code></td><td>distorce o tempo: arrancada lenta, disparada no meio, freada na chegada</td><td>bancada 4</td></tr>
+          <tr><td><code>irregular_intervals(n)</code></td><td>sorteia as <code>n</code> esperas entre os passos, com 20 % delas no triplo</td><td>bancada 5, passo 5</td></tr>
+          <tr><td><code>move_to(x, y)</code></td><td>o movimento inteiro: monta a curva, anda os passos, tremula, às vezes ultrapassa</td><td>bancada 5</td></tr>
+          <tr><td><code>move_to_element(sel)</code></td><td>acha o elemento, garante que está visível e sorteia onde nele clicar</td><td>bancadas 6 e 7</td></tr>
+          <tr><td><code>bring_into_view(el)</code></td><td>rola a página em pedaços até o elemento pousar na faixa de 30 % a 45 %</td><td>bancada 7</td></tr>
+          <tr><td><code>_dentro(box, vp)</code></td><td>responde sim ou não: o elemento cabe inteiro dentro da janela?</td><td>bancada 7</td></tr>
+          <tr><td><code>viewport_of()</code></td><td>descobre o tamanho da janela, com dois planos B se o primeiro falhar</td><td>bancadas 7 e 10</td></tr>
+          <tr><td><code>click(sel)</code></td><td>vai até o elemento, espera, pressiona, segura e solta</td><td>bancada 8</td></tr>
+          <tr><td><code>human_delay(rng)</code></td><td>sorteia um intervalo de cauda longa: parte do mínimo e se estica para a direita</td><td>bancada 9</td></tr>
+          <tr><td><code>type(sel, texto)</code></td><td>clica no campo e digita tecla por tecla, com pausas de pensamento</td><td>bancada 9</td></tr>
+          <tr><td><code>warmup(moves)</code></td><td>passeia sem destino pela janela, para o cursor ter um passado</td><td>bancada 10</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <p class="codenote">As primeiras são <code>@staticmethod</code> — funcionam sozinhas, sem depender de nada guardado no objeto. É por isso que dá para copiá-las para outro projeto sem levar o resto junto. As de baixo precisam da <code>page</code> do Playwright.</p>
+  </section>
+
+  <footer>
+    As dez bancadas usam as contas e os sorteios reais do <code>human_sync.py</code>, com os nomes de variáveis do arquivo — da Bézier ao <code>human_delay</code>. Duas coisas aparecem alteradas na tela, ambas sinalizadas onde acontecem: o tremor e o overshoot vão exagerados 8× e 6×, porque em tamanho real seriam invisíveis; e os desenhos de janela e página estão em escala reduzida. Fora isso, o que você vê aqui é o que o código faz.
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  const MONO = '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
+  const fmt = (n, d) => n.toFixed(d === undefined ? 1 : d).replace('.', ',').replace('-', '−');
+  const $ = id => document.getElementById(id);
+
+  let PAL = {};
+  function readPalette(){
+    const cs = getComputedStyle(document.documentElement);
+    const g = n => cs.getPropertyValue(n).trim();
+    PAL = {
+      stage:g('--stage'), grid:g('--grid'), gridStrong:g('--grid-strong'),
+      ink:g('--ink'), soft:g('--ink-soft'), accent:g('--accent'),
+      magnet:g('--magnet'), perp:g('--perp'), robot:g('--robot'),
+      panel:g('--panel'), rule:g('--rule'), horiz:g('--horiz'), vert:g('--vert')
+    };
+  }
+  readPalette();
+
+  const stages = [];
+
+  function createStage(canvas, W, H, draw){
+    const ctx = canvas.getContext('2d');
+    const wrap = canvas.parentElement;
+    let scale = 1;
+
+    const u = {
+      get scale(){ return scale; },
+      px(v){ return v / scale; },
+      label(text, x, y, color, align, baseline, weight){
+        ctx.font = (weight || 500) + ' ' + u.px(11) + 'px ' + MONO;
+        ctx.textAlign = align || 'left';
+        ctx.textBaseline = baseline || 'middle';
+        ctx.lineJoin = 'round';
+        ctx.lineWidth = u.px(4);
+        ctx.strokeStyle = PAL.stage;
+        ctx.strokeText(text, x, y);
+        ctx.fillStyle = color;
+        ctx.fillText(text, x, y);
+      },
+      line(x1, y1, x2, y2, color, w, dash){
+        ctx.save();
+        ctx.strokeStyle = color; ctx.lineWidth = u.px(w);
+        ctx.setLineDash(dash ? dash.map(d => u.px(d)) : []);
+        ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+        ctx.restore();
+      },
+      arrow(x1, y1, x2, y2, color, w, dash){
+        const a = Math.atan2(y2 - y1, x2 - x1), h = u.px(9);
+        if (Math.hypot(x2 - x1, y2 - y1) > u.px(4))
+          u.line(x1, y1, x2 - Math.cos(a) * h * 0.85, y2 - Math.sin(a) * h * 0.85, color, w, dash);
+        ctx.save();
+        ctx.beginPath();
+        ctx.moveTo(x2, y2);
+        ctx.lineTo(x2 - Math.cos(a - 0.42) * h, y2 - Math.sin(a - 0.42) * h);
+        ctx.lineTo(x2 - Math.cos(a + 0.42) * h, y2 - Math.sin(a + 0.42) * h);
+        ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+        ctx.restore();
+      },
+      dot(x, y, r, fill, ring){
+        ctx.save();
+        ctx.beginPath(); ctx.arc(x, y, u.px(r), 0, Math.PI * 2);
+        ctx.fillStyle = fill; ctx.fill();
+        if (ring){ ctx.lineWidth = u.px(2); ctx.strokeStyle = ring; ctx.stroke(); }
+        ctx.restore();
+      },
+      grid(){
+        ctx.save();
+        ctx.fillStyle = PAL.stage; ctx.fillRect(0, 0, W, H);
+        ctx.lineWidth = u.px(1); ctx.strokeStyle = PAL.grid;
+        ctx.beginPath();
+        for (let x = 0; x <= W; x += 25){ ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+        for (let y = 0; y <= H; y += 25){ ctx.moveTo(0, y); ctx.lineTo(W, y); }
+        ctx.stroke();
+        ctx.beginPath(); ctx.strokeStyle = PAL.gridStrong;
+        for (let x = 0; x <= W; x += 100){ ctx.moveTo(x, 0); ctx.lineTo(x, H); }
+        for (let y = 0; y <= H; y += 100){ ctx.moveTo(0, y); ctx.lineTo(W, y); }
+        ctx.stroke();
+        ctx.restore();
+      },
+      cursor(x, y, color){
+        const s = u.px(1);
+        ctx.save();
+        ctx.translate(x, y); ctx.scale(s, s);
+        ctx.beginPath();
+        ctx.moveTo(0, 0); ctx.lineTo(0, 17.5); ctx.lineTo(4.4, 13.4);
+        ctx.lineTo(7.2, 19.2); ctx.lineTo(9.9, 17.9); ctx.lineTo(7, 12.3); ctx.lineTo(12, 12);
+        ctx.closePath();
+        ctx.fillStyle = color; ctx.strokeStyle = PAL.stage;
+        ctx.lineWidth = 1.6; ctx.lineJoin = 'round';
+        ctx.stroke(); ctx.fill();
+        ctx.restore();
+      },
+      /* os dois catetos: primeiro anda de lado, depois anda para baixo */
+      legs(from, to, colH, colV, showLabels, lw){
+        const corner = { x: to.x, y: from.y };
+        const dh = to.x - from.x, dv = to.y - from.y;
+        if (Math.abs(dh) > 1) u.arrow(from.x, from.y, corner.x, corner.y, colH, lw || 2.4);
+        if (Math.abs(dv) > 1) u.arrow(corner.x, corner.y, to.x, to.y, colV, lw || 2.4);
+        if (Math.abs(dh) > 12 && Math.abs(dv) > 12){
+          const m = u.px(11);
+          ctx.save();
+          ctx.strokeStyle = PAL.soft; ctx.lineWidth = u.px(1);
+          ctx.beginPath();
+          ctx.moveTo(corner.x - Math.sign(dh) * m, corner.y);
+          ctx.lineTo(corner.x - Math.sign(dh) * m, corner.y + Math.sign(dv) * m);
+          ctx.lineTo(corner.x, corner.y + Math.sign(dv) * m);
+          ctx.stroke();
+          ctx.restore();
+        }
+        if (showLabels){
+          if (Math.abs(dh) > 30)
+            u.label(fmt(Math.abs(dh), 0) + (dh < 0 ? ' ←' : ' →'),
+                    (from.x + corner.x) / 2, from.y - u.px(11), colH, 'center', 'bottom', 700);
+          if (Math.abs(dv) > 26)
+            u.label(fmt(Math.abs(dv), 0) + (dv < 0 ? ' ↑' : ' ↓'),
+                    corner.x + u.px(Math.sign(dh) >= 0 ? 10 : -10), (corner.y + to.y) / 2,
+                    colV, Math.sign(dh) >= 0 ? 'left' : 'right', 'middle', 700);
+        }
+      }
+    };
+
+    function render(){ ctx.save(); ctx.clearRect(0, 0, W, H); draw(ctx, u); ctx.restore(); }
+
+    function resize(){
+      const cssW = Math.max(220, wrap.clientWidth);
+      scale = cssW / W;
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.style.width = cssW + 'px';
+      canvas.style.height = (H * scale) + 'px';
+      canvas.width = Math.round(cssW * dpr);
+      canvas.height = Math.round(H * scale * dpr);
+      ctx.setTransform(dpr * scale, 0, 0, dpr * scale, 0, 0);
+      render();
+    }
+
+    function toLocal(ev){
+      const r = canvas.getBoundingClientRect();
+      return { x: (ev.clientX - r.left) / scale, y: (ev.clientY - r.top) / scale };
+    }
+
+    const api = { render, resize, toLocal, canvas, u, W, H };
+    stages.push(api);
+    if (window.ResizeObserver) new ResizeObserver(resize).observe(wrap);
+    else window.addEventListener('resize', resize);
+    resize();
+    return api;
+  }
+
+  function redrawAll(){ stages.forEach(s => s.render()); }
+  function onThemeChange(){ readPalette(); redrawAll(); }
+  if (window.matchMedia){
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    if (mq.addEventListener) mq.addEventListener('change', onThemeChange);
+  }
+  new MutationObserver(onThemeChange).observe(document.documentElement,
+    { attributes: true, attributeFilter: ['data-theme', 'class', 'style'] });
+
+  function draggable(stage, getPoints, onMove){
+    let active = null;
+    stage.canvas.addEventListener('pointerdown', ev => {
+      const p = stage.toLocal(ev), hit = stage.u.px(20);
+      let best = null, bestD = Infinity;
+      getPoints().forEach(pt => {
+        const d = Math.hypot(pt.x - p.x, pt.y - p.y);
+        if (d < hit && d < bestD){ bestD = d; best = pt; }
+      });
+      if (best){
+        active = best;
+        stage.canvas.classList.add('dragging');
+        stage.canvas.setPointerCapture(ev.pointerId);
+        ev.preventDefault();
+      }
+    });
+    stage.canvas.addEventListener('pointermove', ev => {
+      if (!active) return;
+      const p = stage.toLocal(ev);
+      onMove(active, Math.max(16, Math.min(stage.W - 16, p.x)), Math.max(16, Math.min(stage.H - 16, p.y)));
+    });
+    const stop = ev => {
+      if (!active) return;
+      active = null;
+      stage.canvas.classList.remove('dragging');
+      try { stage.canvas.releasePointerCapture(ev.pointerId); } catch(e){}
+    };
+    stage.canvas.addEventListener('pointerup', stop);
+    stage.canvas.addEventListener('pointercancel', stop);
+  }
+
+  /* passo a passo reutilizável */
+  function makeStepper(dotsEl, prevEl, nextEl, countEl, sayEl, texts, onChange){
+    let i = texts.length - 1;
+    texts.forEach((_, k) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('aria-label', 'passo ' + (k + 1));
+      b.addEventListener('click', () => set(k));
+      dotsEl.appendChild(b);
+    });
+    function set(k){
+      i = Math.max(0, Math.min(texts.length - 1, k));
+      Array.from(dotsEl.children).forEach((b, n) =>
+        b.setAttribute('aria-current', n <= i ? 'true' : 'false'));
+      countEl.textContent = (i + 1) + ' / ' + texts.length;
+      sayEl.innerHTML = '<span class="n">' + (i + 1) + '/' + texts.length + '</span><span>' + texts[i] + '</span>';
+      prevEl.disabled = i === 0;
+      nextEl.disabled = i === texts.length - 1;
+      onChange(i + 1);
+    }
+    prevEl.addEventListener('click', () => set(i - 1));
+    nextEl.addEventListener('click', () => set(i + 1));
+    set(i);
+    return { set, get step(){ return i + 1; } };
+  }
+
+  /* ---------- as três receitas, em JavaScript ---------- */
+  function calcularPontoIma(inicio, destino, intensidade, lado){
+    const meioX = (inicio.x + destino.x) / 2, meioY = (inicio.y + destino.y) / 2;
+    const dh = destino.x - inicio.x, dv = destino.y - inicio.y;
+    const comp = Math.hypot(dh, dv) || 1;
+    const ladoX = -dv / comp, ladoY = dh / comp;
+    const desl = intensidade * lado;
+    return { x: meioX + ladoX * desl, y: meioY + ladoY * desl,
+             meioX, meioY, dh, dv, comp, ladoX, ladoY, desl };
+  }
+  function pontoNaCurva(a, c, b, t){
+    const u = 1 - t;
+    return { x: u*u*a.x + 2*u*t*c.x + t*t*b.x, y: u*u*a.y + 2*u*t*c.y + t*t*b.y };
+  }
+  function suavizar(t){ return t < 0.5 ? 2*t*t : 1 - Math.pow(-2*t + 2, 2) / 2; }
+
+  /* ======================= BANCADA 1 ======================= */
+  const S1 = { inicio:{x:110,y:95}, destino:{x:495,y:300}, bend:60, lado:1,
+               prog:.5, step:7, anim:null, jitter:false, seed:1 };
+
+  /* ruído reproduzível, para o tremor não dançar a cada redesenho */
+  function ruido(n){
+    const x = Math.sin(n * 127.1 + S1.seed * 311.7) * 43758.5453;
+    return (x - Math.floor(x)) * 2 - 1;
+  }
+
+  const TXT1 = [
+    'Dois pontos, só isso: <b>de onde</b> o mouse sai e <b>para onde</b> ele precisa ir.',
+    'Um robô ligaria os dois com uma régua — <b>linha reta</b>, velocidade sempre igual.',
+    'Antes de qualquer coisa, o código mede <span class="bl">quanto anda de lado</span> e <span class="gr">quanto anda para baixo</span>. São esses dois números que fazem tudo o mais.',
+    'Com eles dá para achar o <b>meio do caminho</b> — a média entre as duas pontas.',
+    'O meio é empurrado <b>para o lado</b>, numa direção a 90°. Onde ele para, nasce o <b>ponto ímã</b>.',
+    'A curva é atraída pelo ímã, mas percorre só <b>metade</b> da distância até ele. Essa metade é a <b>barriga</b>.',
+    'Pronto: é essa curva laranja que o cursor percorre. Arraste os pontos e mexa nos controles à vontade.'
+  ];
+
+  const st1 = createStage($('c1'), 600, 400, function(ctx, u){
+    u.grid();
+    const S = S1.step;
+    const im = calcularPontoIma(S1.inicio, S1.destino, S1.bend, S1.lado);
+    const C = { x: im.x, y: im.y }, M = { x: im.meioX, y: im.meioY };
+
+    if (S >= 2)
+      u.line(S1.inicio.x, S1.inicio.y, S1.destino.x, S1.destino.y, PAL.robot, 1.5, [6, 5]);
+
+    /* os catetos — os dois números antes de virarem qualquer outra coisa */
+    if (S >= 3)
+      u.legs(S1.inicio, S1.destino, PAL.horiz, PAL.vert, true, S === 3 ? 2.8 : 2);
+
+    if (S >= 4){
+      u.dot(M.x, M.y, 4.2, PAL.panel, PAL.robot);
+      u.dot(M.x, M.y, 1.8, PAL.robot);
+      u.label('meio do caminho', M.x, M.y - u.px(12), PAL.robot, 'center', 'bottom');
+    }
+
+    if (S >= 5){
+      u.arrow(M.x, M.y, C.x, C.y, PAL.perp, 2, [4, 4]);
+      ctx.save();
+      ctx.translate(C.x, C.y); ctx.rotate(Math.PI / 4);
+      ctx.fillStyle = PAL.magnet;
+      const s = u.px(5.4);
+      ctx.fillRect(-s, -s, s * 2, s * 2);
+      ctx.restore();
+      u.label('ponto ímã', C.x, C.y + u.px(15), PAL.magnet, 'center', 'top', 700);
+    }
+
+    if (S >= 6){
+      ctx.save();
+      ctx.strokeStyle = PAL.accent; ctx.lineCap = 'round';
+      ctx.lineWidth = u.px(2.8);
+      ctx.beginPath();
+      for (let i = 0; i <= 140; i++){
+        const p = pontoNaCurva(S1.inicio, C, S1.destino, i / 140);
+        if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      const meioCurva = pontoNaCurva(S1.inicio, C, S1.destino, 0.5);
+      if (S1.bend > 4){
+        u.dot(meioCurva.x, meioCurva.y, 3.8, PAL.accent, PAL.stage);
+        const half = Math.hypot(meioCurva.x - M.x, meioCurva.y - M.y);
+        const sx = C.x - M.x, sy = C.y - M.y, sl = Math.hypot(sx, sy) || 1;
+        const ox = -sy / sl * u.px(14), oy = sx / sl * u.px(14);
+        const m1 = { x:(M.x + meioCurva.x) / 2, y:(M.y + meioCurva.y) / 2 };
+        const m2 = { x:(meioCurva.x + C.x) / 2, y:(meioCurva.y + C.y) / 2 };
+        u.label('barriga ' + fmt(half, 0), m1.x + ox, m1.y + oy, PAL.accent, 'center', 'middle', 700);
+        u.label('+ ' + fmt(half, 0), m2.x - ox, m2.y - oy, PAL.perp, 'center');
+      }
+    }
+
+    u.dot(S1.inicio.x, S1.inicio.y, 7.5, PAL.panel, PAL.ink);
+    u.dot(S1.inicio.x, S1.inicio.y, 2.8, PAL.ink);
+    u.label('início', S1.inicio.x, S1.inicio.y - u.px(17), PAL.ink, 'center', 'bottom', 700);
+    u.dot(S1.destino.x, S1.destino.y, 7.5, PAL.panel, PAL.ink);
+    u.dot(S1.destino.x, S1.destino.y, 2.8, PAL.ink);
+    u.label('destino', S1.destino.x, S1.destino.y + u.px(17), PAL.ink, 'center', 'top', 700);
+
+    if (S >= 7){
+      const t = suavizar(S1.prog);
+      const pos = pontoNaCurva(S1.inicio, C, S1.destino, t);
+      u.cursor(pos.x, pos.y, PAL.accent);
+    }
+  });
+
+  function update1(){
+    const im = calcularPontoIma(S1.inicio, S1.destino, S1.bend, S1.lado);
+    const C = { x: im.x, y: im.y }, M = { x: im.meioX, y: im.meioY };
+    const t = suavizar(S1.prog);
+    const pos = pontoNaCurva(S1.inicio, C, S1.destino, t);
+    const meioCurva = pontoNaCurva(S1.inicio, C, S1.destino, 0.5);
+
+    $('v1-bend').textContent = S1.bend + ' px';
+    $('v1-prog').textContent = Math.round(S1.prog * 100) + ' %';
+    $('r1-dh').textContent = fmt(im.dh, 0) + (im.dh < 0 ? ' ←' : ' →');
+    $('r1-dv').textContent = fmt(im.dv, 0) + (im.dv < 0 ? ' ↑' : ' ↓');
+    $('r1-comp').textContent = fmt(im.comp, 1);
+    $('r1-meio').textContent = fmt(im.meioX, 0) + ' ; ' + fmt(im.meioY, 0);
+    $('r1-lado').textContent = fmt(im.ladoX, 2) + ' ; ' + fmt(im.ladoY, 2);
+    $('r1-desl').textContent = fmt(im.desl, 0) + ' px';
+    $('r1-ima').textContent = fmt(C.x, 0) + ' ; ' + fmt(C.y, 0);
+    $('r1-ts').textContent = fmt(t * 100, 1) + ' %';
+    $('r1-pos').textContent = fmt(pos.x, 0) + ' ; ' + fmt(pos.y, 0);
+    $('r1-barriga').textContent = fmt(Math.hypot(meioCurva.x - M.x, meioCurva.y - M.y), 1)
+      + ' px = ' + fmt(Math.abs(im.desl), 0) + ' ÷ 2';
+    st1.render();
+  }
+
+  draggable(st1, () => [S1.inicio, S1.destino], (pt, x, y) => { pt.x = x; pt.y = y; update1(); });
+
+  const stepper1 = makeStepper($('dots1'), $('b1-prev'), $('b1-next'), $('cnt1'), $('say1'), TXT1, s => {
+    S1.step = s; update1();
+  });
+
+  $('i1-bend').addEventListener('input', e => {
+    S1.bend = +e.target.value;
+    if (S1.step < 5) stepper1.set(4);
+    update1();
+  });
+  $('i1-prog').addEventListener('input', e => {
+    S1.prog = +e.target.value / 100;
+    if (S1.step < 7) stepper1.set(6);
+    update1();
+  });
+
+  function setLado(v){
+    S1.lado = v;
+    $('i1-lado-pos').setAttribute('aria-pressed', v > 0 ? 'true' : 'false');
+    $('i1-lado-neg').setAttribute('aria-pressed', v < 0 ? 'true' : 'false');
+    if (S1.step < 5) stepper1.set(4);
+    update1();
+  }
+  $('i1-lado-pos').addEventListener('click', () => setLado(1));
+  $('i1-lado-neg').addEventListener('click', () => setLado(-1));
+
+  $('i1-roll').addEventListener('click', () => {
+    /* como no arquivo: bend é uma fração da distância, com teto de 120 */
+    const dist = Math.hypot(S1.destino.x - S1.inicio.x, S1.destino.y - S1.inicio.y);
+    S1.bend = Math.round(Math.min(120, dist * (0.15 + Math.random() * 0.2)));
+    S1.seed = Math.random() * 100;
+    $('i1-bend').value = S1.bend;
+    setLado(Math.random() < 0.5 ? -1 : 1);
+  });
+
+  $('i1-play').addEventListener('click', () => {
+    if (S1.anim){ cancelAnimationFrame(S1.anim); S1.anim = null; }
+    stepper1.set(6);
+    const dur = 2200, t0 = performance.now();
+    (function step(now){
+      const k = Math.min(1, (now - t0) / dur);
+      S1.prog = k;
+      $('i1-prog').value = Math.round(k * 100);
+      update1();
+      if (k < 1) S1.anim = requestAnimationFrame(step); else S1.anim = null;
+    })(t0);
+  });
+
+  /* ============ BANCADA "POR QUE GIRAR" ============ */
+  const S4 = { ang: 0, push: 62, step: 5, anim: null };
+  const O4 = { x: 300, y: 178 }, R4 = 132;
+
+  const TXT4 = [
+    'Um movimento para a direita e um empurrão <b>sempre para baixo</b>, de 62 px. Funciona bem: a curva aparece.',
+    'Agora o movimento girou. Parte do empurrão virou <b>desperdício</b>: ela empurra <em>ao longo</em> da linha, e empurrar ao longo da linha não entorta nada — só desloca a barriga para um lado.',
+    'Num movimento vertical, o empurrão para baixo é <b>100 % desperdício</b>. O ímã cai em cima da própria reta, a barriga vira zero e o mouse volta a andar de régua.',
+    'Já o empurrão <b>perpendicular</b> nunca desperdiça nada: os 62 px inteiros viram curva. Mesma barriga, em qualquer direção.',
+    'É esse o sentido do giro: <b>"para o lado" não é uma direção do mundo</b>, é uma direção relativa ao movimento. Gire o controle e veja o laranja se manter enquanto o rosa desmorona.'
+  ];
+
+  const st4 = createStage($('c4'), 600, 356, function(ctx, u){
+    u.grid();
+    const S = S4.step;
+    const th = S4.ang * Math.PI / 180;
+    const mx = Math.cos(th), my = Math.sin(th);        /* direção do movimento */
+    const px_ = -my, py_ = mx;                          /* a mesma direção, girada 90° */
+    const inicio  = { x: O4.x - R4 * mx, y: O4.y - R4 * my };
+    const destino = { x: O4.x + R4 * mx, y: O4.y + R4 * my };
+
+    /* o empurrão fixo: sempre para baixo, aconteça o que acontecer */
+    const fixo = { x: O4.x, y: O4.y + S4.push };
+    /* o empurrão perpendicular: calculado a partir do movimento */
+    const perp = { x: O4.x + px_ * S4.push, y: O4.y + py_ * S4.push };
+
+    const compEntorta = S4.push * Math.cos(th);   /* parte útil do empurrão fixo */
+    const compPerdida = S4.push * Math.sin(th);   /* parte jogada fora */
+
+    /* curva do empurrão fixo */
+    const curva = (c, color, w, dash) => {
+      ctx.save();
+      ctx.strokeStyle = color; ctx.lineWidth = u.px(w); ctx.lineCap = 'round';
+      ctx.setLineDash(dash ? dash.map(d => u.px(d)) : []);
+      ctx.beginPath();
+      for (let i = 0; i <= 120; i++){
+        const p = pontoNaCurva(inicio, c, destino, i / 120);
+        if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+    };
+
+    curva(fixo, PAL.magnet, 3);
+    if (S >= 4) curva(perp, PAL.accent, 3);
+
+    /* a linha reta do movimento, por cima: quando a curva some, ela cola aqui */
+    u.line(inicio.x, inicio.y, destino.x, destino.y, PAL.robot, 1.6, [7, 6]);
+    u.arrow(O4.x + mx * 30, O4.y + my * 30, destino.x, destino.y, PAL.robot, 1.6);
+
+    const cx4 = v => Math.max(60, Math.min(540, v));
+    const cy4 = v => Math.max(14, Math.min(342, v));
+
+    /* decomposição do empurrão fixo em "vira curva" + "desperdício" */
+    if (S >= 2){
+      const meio = { x: O4.x + px_ * compEntorta, y: O4.y + py_ * compEntorta };
+      u.line(O4.x, O4.y, meio.x, meio.y, PAL.perp, 5);
+      u.line(meio.x, meio.y, fixo.x, fixo.y, PAL.robot, 2.2, [4, 4]);
+      if (Math.abs(compEntorta) > 20)
+        u.label('entorta ' + fmt(Math.abs(compEntorta), 0),
+                cx4((O4.x + meio.x) / 2 - mx * u.px(18)),
+                cy4((O4.y + meio.y) / 2 - my * u.px(18)), PAL.perp,
+                -mx >= 0 ? 'left' : 'right', 'middle', 700);
+      if (Math.abs(compPerdida) > 20)
+        u.label('desperdício ' + fmt(Math.abs(compPerdida), 0),
+                cx4((meio.x + fixo.x) / 2 + px_ * u.px(14)),
+                cy4((meio.y + fixo.y) / 2 + py_ * u.px(14)), PAL.robot, 'center', 'middle', 700);
+    }
+
+    u.arrow(O4.x, O4.y, fixo.x, fixo.y, PAL.magnet, 2.4);
+    u.label('fixo', cx4(fixo.x), cy4(fixo.y + u.px(14)), PAL.magnet, 'center', 'top', 700);
+
+    /* o empurrão perpendicular */
+    if (S >= 4){
+      u.arrow(O4.x, O4.y, perp.x, perp.y, PAL.accent, 2.4);
+      u.label('perpendicular', cx4(perp.x + px_ * u.px(15)), cy4(perp.y + py_ * u.px(15)),
+              PAL.accent, 'center', 'middle', 700);
+    }
+
+    /* quando o empurrão fixo não entorta nada, a curva vira a própria reta */
+    if (Math.abs(compEntorta) < 8){
+      u.label('a curva colou na reta',
+              cx4(O4.x - px_ * u.px(16)), cy4(O4.y - py_ * u.px(16)),
+              PAL.magnet, -px_ >= 0 ? 'left' : 'right', 'middle', 700);
+    }
+
+    u.dot(O4.x, O4.y, 4, PAL.panel, PAL.ink);
+    u.dot(O4.x, O4.y, 1.8, PAL.ink);
+    u.dot(inicio.x, inicio.y, 6, PAL.panel, PAL.ink);
+    u.dot(inicio.x, inicio.y, 2.4, PAL.ink);
+    u.label('movimento', cx4(inicio.x - mx * u.px(22)), cy4(inicio.y - my * u.px(22)),
+            PAL.ink, 'center', 'middle', 700);
+  });
+
+  function update4(){
+    const th = S4.ang * Math.PI / 180;
+    const entorta = Math.abs(S4.push * Math.cos(th));
+    const perdido = Math.abs(S4.push * Math.sin(th));
+    $('v4-ang').textContent = S4.ang + '°';
+    $('r4-push').textContent = S4.push + ' px';
+    $('r4-fix-ok').textContent = fmt(entorta, 0) + ' px';
+    $('r4-fix-lost').textContent = fmt(perdido, 0) + ' px';
+    $('r4-fix-b').textContent = fmt(entorta / 2, 1) + ' px' + (entorta < 4 ? '  ✗ sem curva' : '');
+    $('r4-pp-ok').textContent = S4.push + ' px';
+    $('r4-pp-lost').textContent = '0 px';
+    $('r4-pp-b').textContent = fmt(S4.push / 2, 1) + ' px  ✓ sempre';
+    st4.render();
+  }
+
+  const stepper4 = makeStepper($('dots4'), $('b4-prev'), $('b4-next'), $('cnt4'), $('say4'), TXT4, s => {
+    S4.step = s;
+    const angs = { 1: 0, 2: 52, 3: 90, 4: 90 };
+    if (angs[s] !== undefined){ S4.ang = angs[s]; $('i4-ang').value = S4.ang; }
+    update4();
+  });
+
+  $('i4-ang').addEventListener('input', e => {
+    S4.ang = +e.target.value;
+    if (S4.step < 4) stepper4.set(4);
+    update4();
+  });
+
+  $('i4-spin').addEventListener('click', () => {
+    if (S4.anim){ cancelAnimationFrame(S4.anim); S4.anim = null; }
+    stepper4.set(4);
+    const dur = 5000, t0 = performance.now(), from = S4.ang;
+    (function step(now){
+      const k = Math.min(1, (now - t0) / dur);
+      S4.ang = Math.round((from + k * 180) % 181);
+      $('i4-ang').value = S4.ang;
+      update4();
+      if (k < 1) S4.anim = requestAnimationFrame(step); else S4.anim = null;
+    })(t0);
+  });
+
+  /* ============ BANCADA 5: DENTRO DO move_to() ============ */
+  const S5 = { step: 5, seed: 7, playT: null, anim: null, run: null };
+  const JX_VIS = 8;   /* tremor exagerado para caber no olho */
+  const OV_VIS = 6;   /* overshoot idem */
+
+  const TXT5 = [
+    'A <b>Bézier lisa</b> — é onde as bancadas anteriores param. Uma linha contínua e matematicamente perfeita.',
+    'Mas o código não anda numa linha contínua: ele parte o trajeto em <code>steps</code> pedaços, um a cada 6 a 12 px. Repare que os pontos ficam <b>apertados nas pontas e espaçados no meio</b> — é a suavização aparecendo no espaçamento.',
+    'A cada ponto ele soma um <b>tremor</b> de meio pixel (<code>jx</code>, <code>jy</code>). O cursor deixa de cair exatamente em cima da curva; a Bézier vira só a linha de base.',
+    'Em 35 % das vezes ele <b>passa do alvo</b>, espera um instante e volta. É o overshoot — a correção que todo mundo faz ao mirar rápido.',
+    'E as esperas entre os passos <b>não são iguais</b>: 12 ms em média, mas com 20 % de passos lentos, no triplo. Aperte "executar os dois" e veja o real se atrasar em relação ao ideal.'
+  ];
+
+  function mulberry32(a){
+    return function(){
+      a = a + 0x6D2B79F5 | 0;
+      let t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+
+  function gerarRun(){
+    const rnd = mulberry32(Math.floor(S5.seed * 9973));
+    const gauss = (m, s) => {
+      let u = 0, v = 0;
+      while (!u) u = rnd();
+      while (!v) v = rnd();
+      return m + s * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    };
+    const a = { x: 78, y: 262 }, b = { x: 522, y: 108 };
+    const dx = b.x - a.x, dy = b.y - a.y;
+    const dist = Math.hypot(dx, dy), length = dist || 1;
+
+    /* mesma receita do arquivo */
+    const steps = Math.max(12, Math.round(dist / (6 + Math.floor(rnd() * 7)))
+                               + (Math.floor(rnd() * 8) - 3));
+    const bend = Math.min(120, dist * (0.15 + rnd() * 0.2));
+    const off = bend * (rnd() < 0.5 ? -1 : 1);
+    const nx = -dy / length, ny = dx / length;
+    const ctrl = { x: (a.x + b.x) / 2 + nx * off, y: (a.y + b.y) / 2 + ny * off };
+
+    const pts = [], gaps = [];
+    let lentos = 0;
+    for (let i = 1; i <= steps; i++){
+      const t = suavizar(i / steps);
+      const puro = pontoNaCurva(a, ctrl, b, t);
+      pts.push({
+        puro,
+        x: puro.x + gauss(0, 0.6) * JX_VIS,
+        y: puro.y + gauss(0, 0.6) * JX_VIS
+      });
+      const lento = rnd() < 0.2;
+      if (lento) lentos++;
+      gaps.push(Math.max(4, gauss(12 * (lento ? 3 : 1), 12 * 0.6)));
+    }
+    const over = rnd() < 0.35
+      ? { x: b.x + gauss(0, 3) * OV_VIS, y: b.y + gauss(0, 3) * OV_VIS,
+          espera: 20 + rnd() * 50 }
+      : null;
+
+    const tReal = gaps.reduce((s, g) => s + g, 0) + (over ? over.espera : 0);
+    return { a, b, ctrl, dist, steps, bend, off, pts, gaps, over, lentos,
+             tReal, tIdeal: steps * 12 };
+  }
+  S5.run = gerarRun();
+
+  const st5 = createStage($('c5'), 600, 330, function(ctx, u){
+    u.grid();
+    const S = S5.step, R = S5.run;
+
+    /* camada 1: a Bézier lisa */
+    ctx.save();
+    ctx.strokeStyle = PAL.accent; ctx.lineCap = 'round';
+    ctx.lineWidth = u.px(S >= 2 ? 1.4 : 3);
+    ctx.globalAlpha = S >= 2 ? .35 : 1;
+    ctx.beginPath();
+    for (let i = 0; i <= 140; i++){
+      const p = pontoNaCurva(R.a, R.ctrl, R.b, i / 140);
+      if (i === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+    }
+    ctx.stroke();
+    ctx.restore();
+    if (S === 1)
+      u.label('a Bézier: contínua e perfeita', R.ctrl.x, R.ctrl.y - u.px(16),
+              PAL.accent, 'center', 'bottom', 700);
+
+    /* camada 2 e 3: os passos, puros ou já com o tremor */
+    if (S >= 2){
+      const usa = S >= 3 ? p => p : p => p.puro;
+      ctx.save();
+      ctx.strokeStyle = PAL.accent; ctx.lineWidth = u.px(1.5); ctx.lineJoin = 'round';
+      ctx.beginPath();
+      ctx.moveTo(R.a.x, R.a.y);
+      R.pts.forEach(p => { const q = usa(p); ctx.lineTo(q.x, q.y); });
+      ctx.stroke();
+      ctx.restore();
+      R.pts.forEach(p => { const q = usa(p); u.dot(q.x, q.y, 2.4, PAL.accent); });
+      u.label(R.steps + ' passos' + (S >= 3 ? ' · tremor 8× exagerado' : ''),
+              R.a.x + u.px(6), R.a.y - u.px(14), PAL.accent, 'left', 'bottom', 700);
+    }
+
+    /* camada 4: o overshoot */
+    if (S >= 4 && R.over){
+      const ult = R.pts[R.pts.length - 1];
+      u.line(ult.x, ult.y, R.over.x, R.over.y, PAL.magnet, 1.8);
+      u.dot(R.over.x, R.over.y, 3.4, PAL.magnet);
+      u.arrow(R.over.x, R.over.y, R.b.x, R.b.y, PAL.magnet, 1.8, [3, 3]);
+      u.label('passou do alvo, esperou ' + fmt(R.over.espera, 0) + ' ms e voltou',
+              Math.min(560, R.over.x + u.px(12)), R.over.y - u.px(12),
+              PAL.magnet, 'right', 'bottom', 700);
+    }
+
+    /* pontas */
+    u.dot(R.a.x, R.a.y, 7, PAL.panel, PAL.ink);
+    u.dot(R.a.x, R.a.y, 2.6, PAL.ink);
+    u.label('a', R.a.x - u.px(14), R.a.y, PAL.ink, 'right', 'middle', 700);
+    u.dot(R.b.x, R.b.y, 7, PAL.panel, PAL.ink);
+    u.dot(R.b.x, R.b.y, 2.6, PAL.ink);
+    u.label('b', R.b.x + u.px(14), R.b.y, PAL.ink, 'left', 'middle', 700);
+
+    /* os dois cursores, durante a execução */
+    if (S5.playT !== null){
+      let acc = 0, idx = 0;
+      while (idx < R.gaps.length && acc + R.gaps[idx] <= S5.playT){ acc += R.gaps[idx]; idx++; }
+      const real = R.pts[Math.min(idx, R.pts.length - 1)];
+      const kIdeal = Math.min(1, S5.playT / R.tIdeal);
+      const ideal = pontoNaCurva(R.a, R.ctrl, R.b, suavizar(kIdeal));
+      u.cursor(ideal.x, ideal.y, PAL.robot);
+      u.label('ideal', ideal.x + u.px(15), ideal.y + u.px(20), PAL.robot, 'left', 'middle', 700);
+      u.cursor(real.x, real.y, PAL.accent);
+      u.label('real', real.x + u.px(15), real.y + u.px(20), PAL.accent, 'left', 'middle', 700);
+    }
+  });
+
+  /* a linha do tempo: as esperas sorteadas contra esperas iguais */
+  const st5b = createStage($('c5b'), 600, 146, function(ctx, u){
+    ctx.fillStyle = PAL.stage; ctx.fillRect(0, 0, 600, 146);
+    const R = S5.run;
+    const L = 16, Rr = 584;
+    const total = Math.max(R.tReal, R.tIdeal);
+    const X = ms => L + (ms / total) * (Rr - L);
+
+    const linha = (y, rotulo, cor, marcas, destaques) => {
+      u.line(L, y, Rr, y, PAL.rule, 1.5);
+      marcas.forEach((ms, i) => {
+        const alto = destaques && destaques[i];
+        u.line(X(ms), y - u.px(alto ? 13 : 7), X(ms), y + u.px(alto ? 13 : 7),
+               alto ? PAL.magnet : cor, alto ? 2 : 1.2);
+      });
+      u.label(rotulo, L, y - u.px(26), cor, 'left', 'middle', 700);
+    };
+
+    let acc = 0;
+    const marcasR = [], lentos = [];
+    R.gaps.forEach(g => { acc += g; marcasR.push(acc); lentos.push(g > 12 * 1.9); });
+    linha(46, 'esperas sorteadas · ' + fmt(R.tReal, 0) + ' ms', PAL.accent, marcasR, lentos);
+
+    const marcasI = [];
+    for (let i = 1; i <= R.steps; i++) marcasI.push(i * 12);
+    linha(102, 'esperas iguais · ' + fmt(R.tIdeal, 0) + ' ms', PAL.robot, marcasI, null);
+
+    u.label('cada marca é um passo; as rosa são os lentos, com o triplo da espera',
+            L, 132, PAL.magnet, 'left', 'middle', 700);
+
+    if (S5.playT !== null){
+      const x = X(Math.min(S5.playT, total));
+      u.line(x, 24, x, 118, PAL.ink, 1.5, [4, 3]);
+    }
+  });
+
+  function update5(){
+    const R = S5.run;
+    $('r5-dist').textContent = fmt(R.dist, 0) + ' px';
+    $('r5-steps').textContent = R.steps;
+    $('r5-bend').textContent = fmt(R.bend, 0) + ' px';
+    $('r5-slow').textContent = R.lentos + ' de ' + R.steps;
+    $('r5-treal').textContent = fmt(R.tReal, 0) + ' ms';
+    $('r5-tideal').textContent = fmt(R.tIdeal, 0) + ' ms';
+    $('r5-over').textContent = R.over ? 'sim, ' + fmt(Math.hypot(R.over.x - R.b.x, R.over.y - R.b.y) / OV_VIS, 1) + ' px' : 'não saiu no sorteio';
+    st5.render(); st5b.render();
+  }
+
+  const stepper5 = makeStepper($('dots5'), $('b5-prev'), $('b5-next'), $('cnt5'), $('say5'), TXT5, s => {
+    S5.step = s; update5();
+  });
+
+  $('i5-roll').addEventListener('click', () => {
+    S5.seed = Math.random() * 1000;
+    S5.run = gerarRun();
+    S5.playT = null;
+    update5();
+  });
+
+  $('i5-play').addEventListener('click', () => {
+    if (S5.anim){ cancelAnimationFrame(S5.anim); S5.anim = null; }
+    stepper5.set(4);
+    const R = S5.run, fim = Math.max(R.tReal, R.tIdeal) + 260;
+    const t0 = performance.now();
+    (function passo(now){
+      S5.playT = now - t0;
+      if (S5.playT >= fim){ S5.playT = null; S5.anim = null; update5(); return; }
+      update5();
+      S5.anim = requestAnimationFrame(passo);
+    })(t0);
+  });
+
+  /* ======================= BANCADA 3: COMO GIRAR ======================= */
+  const O2 = { x: 255, y: 140 };
+  const S2 = { p:{ x:405, y:200 }, giro:true, step:6, ghosts:[] };
+
+  const TXT2 = [
+    'Uma seta qualquer. Ela anda <span class="bl">um tanto de lado</span> e <span class="gr">um tanto para baixo</span>.',
+    'Guarde os dois números. <b>É só isso que o giro vai usar</b> — nada mais.',
+    'Girar 90° é <b>trocar os dois de casa</b>: o que era "para baixo" passa a ser "de lado". Veja as cores mudarem de lugar no quadro abaixo.',
+    'Mas trocar sozinho não basta: dá um <b>espelho</b>. Clique em "girar de novo" e repare que a seta vai e volta entre dois lugares.',
+    'O <b>menos</b> conserta isso — ele inverte um dos dois números, e a troca vira giro de verdade.',
+    'Agora clique em "girar de novo" várias vezes: <b>direita → baixo → esquerda → cima</b>, sempre no mesmo sentido.'
+  ];
+
+  const st2 = createStage($('c2'), 520, 350, function(ctx, u){
+    u.grid();
+    const S = S2.step;
+    const dh = S2.p.x - O2.x, dv = S2.p.y - O2.y;
+    const q = S2.giro ? { x:-dv, y:dh } : { x:dv, y:dh };
+    const Q = { x: O2.x + q.x, y: O2.y + q.y };
+
+    u.line(0, O2.y, 520, O2.y, PAL.grid, 1.5);
+    u.line(O2.x, 0, O2.x, 350, PAL.grid, 1.5);
+
+    /* rastro das setas anteriores */
+    ctx.save();
+    ctx.globalAlpha = .3;
+    S2.ghosts.forEach(g => u.arrow(O2.x, O2.y, O2.x + g.x, O2.y + g.y, PAL.soft, 1.6));
+    ctx.restore();
+
+    /* a seta original e seus dois catetos */
+    u.legs(O2, S2.p, PAL.horiz, PAL.vert, S >= 1, 2.4);
+    u.arrow(O2.x, O2.y, S2.p.x, S2.p.y, PAL.ink, 2.6);
+
+    if (S >= 3){
+      /* a seta nova: os mesmos números, trocados de casa — as cores vão junto */
+      u.legs(O2, Q, PAL.vert, PAL.horiz, true, 2.4);
+      u.arrow(O2.x, O2.y, Q.x, Q.y, PAL.perp, 2.6);
+
+      if (S2.giro){
+        const len = Math.hypot(dh, dv) || 1;
+        const ux = dh / len, uy = dv / len, vx = -dv / len, vy = dh / len;
+        const m = u.px(16);
+        ctx.save();
+        ctx.strokeStyle = PAL.perp; ctx.lineWidth = u.px(1.3);
+        ctx.beginPath();
+        ctx.moveTo(O2.x + ux * m, O2.y + uy * m);
+        ctx.lineTo(O2.x + (ux + vx) * m, O2.y + (uy + vy) * m);
+        ctx.lineTo(O2.x + vx * m, O2.y + vy * m);
+        ctx.stroke();
+        ctx.restore();
+      } else {
+        u.line(O2.x - 190, O2.y - 190, O2.x + 190, O2.y + 190, PAL.magnet, 1.2, [5, 5]);
+        u.label('o espelho', O2.x + 130, O2.y + 148, PAL.magnet, 'left', 'middle', 700);
+      }
+    }
+
+    const cx = v => Math.max(58, Math.min(462, v));
+    const cy = v => Math.max(14, Math.min(338, v));
+    u.dot(S2.p.x, S2.p.y, 7.5, PAL.panel, PAL.ink);
+    u.label('seta original', cx(S2.p.x), cy(S2.p.y + u.px(18)), PAL.ink, 'center', 'top', 700);
+    if (S >= 3)
+      u.label(S2.giro ? 'seta girada 90°' : 'seta espelhada',
+              cx(Q.x), cy(Q.y + u.px(17)), PAL.perp, 'center', 'top', 700);
+    u.dot(O2.x, O2.y, 3.6, PAL.ink);
+  });
+
+  function update2(){
+    const dh = S2.p.x - O2.x, dv = S2.p.y - O2.y;
+    const q = S2.giro ? { x:-dv, y:dh } : { x:dv, y:dh };
+    const dot = dh * q.x + dv * q.y;
+    const len = Math.hypot(dh, dv) * Math.hypot(q.x, q.y) || 1;
+    const ang = Math.acos(Math.max(-1, Math.min(1, dot / len))) * 180 / Math.PI;
+
+    $('r2-dh').textContent = fmt(dh, 0);
+    $('r2-dv').textContent = fmt(dv, 0);
+    $('r2-fx').textContent = S2.giro ? '-dy' : 'dy';
+    $('r2-lx').textContent = fmt(q.x, 0);
+    $('r2-ly').textContent = fmt(q.y, 0);
+    $('r2-ang').textContent = fmt(ang, 1) + '°' + (Math.abs(ang - 90) < 0.6 ? '  ✓ perpendicular' : '');
+
+    $('sw-a-h').textContent = fmt(dh, 0);
+    $('sw-a-v').textContent = fmt(dv, 0);
+    $('sw-b-h').textContent = fmt(q.x, 0);
+    $('sw-b-v').textContent = fmt(q.y, 0);
+
+    const badge = $('minusbadge');
+    badge.classList.toggle('off', !S2.giro);
+    badge.textContent = S2.giro ? '↑ o menos entra aqui' : 'sem o menos';
+    $('swapcap').innerHTML = S2.giro
+      ? 'O <b>verde</b> saiu da casa de baixo e foi para a de cima, levando um <b>menos</b> junto; o <b>azul</b> fez o caminho contrário. Só isso é o giro de 90°.'
+      : 'As cores trocaram de casa, mas <b>ninguém ganhou o menos</b>. Sem ele a seta só se reflete: aplique de novo e ela volta para onde estava.';
+    st2.render();
+  }
+
+  draggable(st2, () => [S2.p], (pt, x, y) => { pt.x = x; pt.y = y; update2(); });
+
+  const stepper2 = makeStepper($('dots2'), $('b2-prev'), $('b2-next'), $('cnt2'), $('say2'), TXT2, s => {
+    S2.step = s;
+    if (s === 4) setModo(false, true);
+    else if (s >= 5) setModo(true, true);
+    else update2();
+  });
+
+  function setModo(giro, quiet){
+    S2.giro = giro;
+    $('i2-giro').setAttribute('aria-pressed', giro ? 'true' : 'false');
+    $('i2-esp').setAttribute('aria-pressed', giro ? 'false' : 'true');
+    if (!quiet && S2.step < 3) stepper2.set(2);
+    update2();
+  }
+  $('i2-giro').addEventListener('click', () => setModo(true));
+  $('i2-esp').addEventListener('click', () => { setModo(false); if (S2.step < 4) stepper2.set(3); });
+
+  $('i2-apply').addEventListener('click', () => {
+    const dh = S2.p.x - O2.x, dv = S2.p.y - O2.y;
+    const q = S2.giro ? { x:-dv, y:dh } : { x:dv, y:dh };
+    S2.ghosts.push({ x: dh, y: dv });
+    if (S2.ghosts.length > 3) S2.ghosts.shift();
+    S2.p.x = O2.x + q.x; S2.p.y = O2.y + q.y;
+    if (S2.step < 3) stepper2.set(2);
+    update2();
+  });
+  $('i2-clear').addEventListener('click', () => { S2.ghosts = []; update2(); });
+
+  document.querySelectorAll('.preset').forEach(b => {
+    b.addEventListener('click', () => {
+      const d = b.dataset.dir, L = 145, V = 120;
+      S2.ghosts = [];
+      if (d === 'dir'){ S2.p.x = O2.x + L; S2.p.y = O2.y; }
+      if (d === 'bai'){ S2.p.x = O2.x;     S2.p.y = O2.y + V; }
+      if (d === 'esq'){ S2.p.x = O2.x - L; S2.p.y = O2.y; }
+      if (d === 'cim'){ S2.p.x = O2.x;     S2.p.y = O2.y - V; }
+      update2();
+    });
+  });
+
+  /* ======================= BANCADA 3 ======================= */
+  const S3 = { prog:.5, anim:null };
+  const PLOT = { l:68, r:368, t:34, b:334 };
+
+  const st3 = createStage($('c3'), 400, 400, function(ctx, u){
+    ctx.fillStyle = PAL.stage; ctx.fillRect(0, 0, 400, 400);
+    const W = PLOT.r - PLOT.l, H = PLOT.b - PLOT.t;
+    const X = v => PLOT.l + v * W, Y = v => PLOT.b - v * H;
+
+    ctx.save();
+    ctx.strokeStyle = PAL.grid; ctx.lineWidth = u.px(1);
+    ctx.beginPath();
+    for (let i = 0; i <= 4; i++){
+      ctx.moveTo(PLOT.l, Y(i / 4)); ctx.lineTo(PLOT.r, Y(i / 4));
+      ctx.moveTo(X(i / 4), PLOT.t); ctx.lineTo(X(i / 4), PLOT.b);
+    }
+    ctx.stroke();
+    ctx.strokeStyle = PAL.gridStrong; ctx.lineWidth = u.px(1.2);
+    ctx.strokeRect(PLOT.l, PLOT.t, W, H);
+    ctx.restore();
+
+    for (let i = 0; i <= 4; i++){
+      u.label((i * 25) + '%', PLOT.l - u.px(8), Y(i / 4), PAL.soft, 'right', 'middle');
+      u.label((i * 25) + '%', X(i / 4), PLOT.b + u.px(10), PAL.soft, 'center', 'top');
+    }
+    u.label('caminho andado', PLOT.l - u.px(8), PLOT.t - u.px(14), PAL.soft, 'left', 'bottom');
+    u.label('tempo que passou →', PLOT.r, PLOT.b + u.px(28), PAL.soft, 'right', 'top');
+
+    u.line(X(0), Y(0), X(1), Y(1), PAL.robot, 1.6, [6, 5]);
+    u.label('robô', X(.8), Y(.8) - u.px(11), PAL.robot, 'center', 'bottom', 700);
+
+    ctx.save();
+    ctx.strokeStyle = PAL.accent; ctx.lineWidth = u.px(2.8); ctx.lineCap = 'round';
+    ctx.beginPath();
+    for (let i = 0; i <= 120; i++){
+      const t = i / 120, v = suavizar(t);
+      if (i === 0) ctx.moveTo(X(t), Y(v)); else ctx.lineTo(X(t), Y(v));
+    }
+    ctx.stroke();
+    ctx.restore();
+    u.label('humano', X(.32), Y(.19) - u.px(12), PAL.accent, 'center', 'bottom', 700);
+
+    const t = S3.prog, v = suavizar(t);
+    u.line(X(t), PLOT.b, X(t), Y(v), PAL.accent, 1, [3, 3]);
+    u.line(PLOT.l, Y(v), X(t), Y(v), PAL.accent, 1, [3, 3]);
+    u.dot(X(t), Y(v), 5, PAL.accent, PAL.stage);
+    u.dot(X(t), Y(t), 3.6, PAL.robot, PAL.stage);
+    u.label(fmt(v * 100, 0) + '%', PLOT.l + u.px(6), Y(v) - u.px(10), PAL.accent, 'left', 'bottom', 700);
+  });
+
+  function update3(){
+    const t = S3.prog, v = suavizar(t);
+    $('v3-prog').textContent = Math.round(t * 100) + ' %';
+    $('t3-robo').textContent = Math.round(t * 100) + ' %';
+    $('t3-hum').textContent = Math.round(v * 100) + ' %';
+    const railW = $('p3-robo').parentElement.clientWidth;
+    $('p3-robo').style.transform = 'translateX(' + (t * railW) + 'px)';
+    $('p3-hum').style.transform = 'translateX(' + (v * railW) + 'px)';
+    $('tr3-robo').style.width = (t * railW) + 'px';
+    $('tr3-hum').style.width = (v * railW) + 'px';
+    const h = 0.004, a = Math.max(0, t - h), b = Math.min(1, t + h);
+    const vel = (suavizar(b) - suavizar(a)) / (b - a);
+    $('r3-now').textContent = Math.round(t * 100) + ' % → ' + fmt(v * 100, 1) + ' %';
+    $('r3-vel').textContent = fmt(vel, 2) + '×  (o robô é sempre 1,00×)';
+    st3.render();
+  }
+
+  $('i3-prog').addEventListener('input', e => { S3.prog = +e.target.value / 100; update3(); });
+  $('i3-play').addEventListener('click', () => {
+    if (S3.anim){ cancelAnimationFrame(S3.anim); S3.anim = null; }
+    const dur = 2600, t0 = performance.now();
+    (function step(now){
+      const k = Math.min(1, (now - t0) / dur);
+      S3.prog = k;
+      $('i3-prog').value = Math.round(k * 100);
+      update3();
+      if (k < 1) S3.anim = requestAnimationFrame(step); else S3.anim = null;
+    })(t0);
+  });
+
+  window.addEventListener('resize', update3);
+  update2();
+  update3();
+
+  /* ================= PARTE 2: O RESTO DA CLASSE ================= */
+
+  function rngDe(seed){
+    const r = mulberry32(Math.floor(seed * 7919) | 0);
+    r.gauss = (m, s) => {
+      let u = 0, v = 0;
+      while (!u) u = r();
+      while (!v) v = r();
+      return m + s * Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * v);
+    };
+    r.entre = (lo, hi) => lo + r() * (hi - lo);
+    return r;
+  }
+
+  /* ---------- B6: onde o clique cai ---------- */
+  const S6 = { n: 120, seed: 3 };
+  const BTN = { x: 168, y: 112, w: 264, h: 82 };
+
+  const st6 = createStage($('c6'), 600, 300, function(ctx, u){
+    u.grid();
+    const r = rngDe(S6.seed);
+
+    /* o botão */
+    ctx.save();
+    ctx.fillStyle = PAL.panel; ctx.strokeStyle = PAL.ink; ctx.lineWidth = u.px(1.5);
+    ctx.beginPath(); ctx.roundRect(BTN.x, BTN.y, BTN.w, BTN.h, u.px(4));
+    ctx.fill(); ctx.stroke();
+    ctx.restore();
+    u.label('um botão de 264 × 82 px', BTN.x - u.px(10), BTN.y + BTN.h / 2,
+            PAL.ink, 'right', 'middle', 700);
+
+    /* a faixa sorteável */
+    const fx = BTN.x + BTN.w * 0.35, fw = BTN.w * 0.3;
+    const fy = BTN.y + BTN.h * 0.35, fh = BTN.h * 0.3;
+    ctx.save();
+    ctx.fillStyle = PAL.accent; ctx.globalAlpha = .12;
+    ctx.fillRect(fx, fy, fw, fh);
+    ctx.globalAlpha = .6; ctx.strokeStyle = PAL.accent; ctx.lineWidth = u.px(1);
+    ctx.setLineDash([u.px(3), u.px(3)]);
+    ctx.strokeRect(fx, fy, fw, fh);
+    ctx.restore();
+
+    /* medidas */
+    u.line(BTN.x, BTN.y - u.px(16), fx, BTN.y - u.px(16), PAL.robot, 1.2);
+    u.label('35 %', (BTN.x + fx) / 2, BTN.y - u.px(22), PAL.robot, 'center', 'bottom');
+    u.line(fx, BTN.y - u.px(16), fx + fw, BTN.y - u.px(16), PAL.accent, 2);
+    u.label('30 % sorteável', fx + fw / 2, BTN.y - u.px(22), PAL.accent, 'center', 'bottom', 700);
+    u.line(fx + fw, BTN.y - u.px(16), BTN.x + BTN.w, BTN.y - u.px(16), PAL.robot, 1.2);
+    u.label('35 %', (fx + fw + BTN.x + BTN.w) / 2, BTN.y - u.px(22), PAL.robot, 'center', 'bottom');
+
+    /* a nuvem de cliques */
+    const pts = [];
+    for (let i = 0; i < S6.n; i++){
+      pts.push({ x: BTN.x + BTN.w * (0.35 + r() * 0.3),
+                 y: BTN.y + BTN.h * (0.35 + r() * 0.3) });
+    }
+    ctx.save();
+    ctx.globalAlpha = .75;
+    pts.forEach(p => u.dot(p.x, p.y, 2, PAL.accent));
+    ctx.restore();
+
+    /* o robô */
+    const cx = BTN.x + BTN.w / 2, cy = BTN.y + BTN.h / 2;
+    u.dot(cx, cy, 7, PAL.panel);
+    u.dot(cx, cy, 4.5, PAL.robot, PAL.panel);
+    u.line(cx, cy + u.px(9), cx, BTN.y + BTN.h + u.px(16), PAL.robot, 1.2, [3, 3]);
+    u.label('o robô clica sempre aqui', cx, BTN.y + BTN.h + u.px(20),
+            PAL.robot, 'center', 'top', 700);
+
+    S6._pts = pts;
+  });
+
+  function update6(){
+    const r = rngDe(S6.seed);
+    $('v6-n').textContent = S6.n;
+    $('r6-n2').textContent = S6.n;
+    $('r6-fx').textContent = fmt(BTN.w * 0.3, 0) + ' px dos 264';
+    $('r6-fy').textContent = fmt(BTN.h * 0.3, 0) + ' px dos 82';
+    st6.render();
+    const vistos = new Set((S6._pts || []).map(p => Math.round(p.x) + ':' + Math.round(p.y)));
+    $('r6-uniq').textContent = vistos.size;
+    $('r6-marg').textContent = fmt(BTN.w * 0.35, 0) + ' px nas laterais';
+  }
+  $('i6-n').addEventListener('input', e => { S6.n = +e.target.value; update6(); });
+  $('i6-roll').addEventListener('click', () => { S6.seed = Math.random() * 999; update6(); });
+  update6();
+
+  /* ---------- B7: a rolagem ---------- */
+  const VP_REAL = 800, PAG_REAL = 5200, ELEM_H = 66;
+  const S7 = { elemY: 2400, scroll: 0, seed: 5, plan: null, anim: null,
+               iter: 0, passo: 0, wait: 0, estado: 'fora da janela' };
+
+  const st7 = createStage($('c7'), 600, 364, function(ctx, u){
+    ctx.fillStyle = PAL.stage; ctx.fillRect(0, 0, 600, 364);
+    const VX = 118, VY = 34, VW = 364, VH = 300;
+    const k = VH / VP_REAL;                 /* real → tela */
+
+    /* a página, recortada pela janela */
+    ctx.save();
+    ctx.beginPath(); ctx.rect(VX, VY, VW, VH); ctx.clip();
+    ctx.fillStyle = PAL.panel; ctx.fillRect(VX, VY, VW, VH);
+
+    /* linhas de texto falso */
+    ctx.strokeStyle = PAL.rule; ctx.lineWidth = u.px(3);
+    for (let y = 0; y < PAG_REAL; y += 90){
+      const ty = VY + (y - S7.scroll) * k;
+      if (ty < VY - 10 || ty > VY + VH + 10) continue;
+      const w = (VW - 44) * (0.5 + ((y / 90) % 5) * 0.1);
+      ctx.beginPath(); ctx.moveTo(VX + 22, ty); ctx.lineTo(VX + 22 + w, ty); ctx.stroke();
+    }
+
+    /* a faixa de pouso, 30 % a 45 % da janela */
+    const b1 = VY + VP_REAL * 0.30 * k, b2 = VY + VP_REAL * 0.45 * k;
+    ctx.save();
+    ctx.fillStyle = PAL.accent; ctx.globalAlpha = .13;
+    ctx.fillRect(VX, b1, VW, b2 - b1);
+    ctx.restore();
+
+    /* o elemento alvo */
+    const ey = VY + (S7.elemY - S7.scroll) * k;
+    ctx.fillStyle = PAL.magnet; ctx.globalAlpha = .9;
+    ctx.fillRect(VX + 40, ey, VW - 80, ELEM_H * k);
+    ctx.globalAlpha = 1;
+    ctx.restore();
+
+    u.label('o elemento', VX + VW / 2, ey + ELEM_H * k / 2, PAL.panel, 'center', 'middle', 700);
+
+    /* moldura da janela */
+    ctx.save();
+    ctx.strokeStyle = PAL.ink; ctx.lineWidth = u.px(2);
+    ctx.strokeRect(VX, VY, VW, VH);
+    ctx.restore();
+    u.label('a janela do navegador', VX, VY - u.px(10), PAL.ink, 'left', 'bottom', 700);
+    u.label('faixa de pouso', VX + VW + u.px(10), (b1 + b2) / 2, PAL.accent, 'left', 'middle', 700);
+    u.label('30 %', VX - u.px(8), b1, PAL.accent, 'right', 'middle');
+    u.label('45 %', VX - u.px(8), b2, PAL.accent, 'right', 'middle');
+
+    /* quando o elemento está fora da janela, aponta para onde ele está */
+    const dist = S7.elemY - S7.scroll;
+    if (dist > VP_REAL){
+      u.arrow(VX + VW / 2, VY + VH - u.px(30), VX + VW / 2, VY + VH - u.px(8), PAL.magnet, 2);
+      u.label(fmt(dist - VP_REAL, 0) + ' px abaixo da janela',
+              VX + VW / 2, VY + VH - u.px(38), PAL.magnet, 'center', 'bottom', 700);
+    } else if (dist + ELEM_H < 0){
+      u.arrow(VX + VW / 2, VY + u.px(30), VX + VW / 2, VY + u.px(8), PAL.magnet, 2);
+      u.label(fmt(-dist, 0) + ' px acima da janela',
+              VX + VW / 2, VY + u.px(38), PAL.magnet, 'center', 'top', 700);
+    }
+
+    /* régua da página inteira, à direita */
+    const RX = 548, RY = VY, RH = VH;
+    ctx.save();
+    ctx.fillStyle = PAL.rule; ctx.fillRect(RX, RY, u.px(6), RH);
+    const vis = (S7.scroll / PAG_REAL) * RH, visH = (VP_REAL / PAG_REAL) * RH;
+    ctx.fillStyle = PAL.ink; ctx.fillRect(RX, RY + vis, u.px(6), visH);
+    ctx.fillStyle = PAL.magnet;
+    ctx.fillRect(RX - u.px(3), RY + (S7.elemY / PAG_REAL) * RH, u.px(12), u.px(3));
+    ctx.restore();
+    u.label('a página', RX + u.px(9), RY - u.px(10), PAL.soft, 'right', 'bottom');
+  });
+
+  function planoDeRolagem(){
+    const r = rngDe(S7.seed);
+    const plan = [];
+    let scroll = 0;
+    for (let i = 0; i < 8; i++){
+      const boxY = S7.elemY - scroll;
+      if (boxY >= 0 && boxY + ELEM_H <= VP_REAL) break;
+      const dy = boxY - VP_REAL * (0.30 + r() * 0.15);
+      const passo = Math.max(-700, Math.min(700, dy));
+      if (Math.abs(passo) < 1) break;
+      scroll += passo;
+      plan.push({ scroll, passo, wait: 90 + r() * 170 });
+    }
+    return plan;
+  }
+
+  function update7(){
+    $('v7-pos').textContent = S7.elemY + ' px';
+    $('r7-iter').textContent = S7.plan ? S7.iter + ' de ' + S7.plan.length : '—';
+    $('r7-passo').textContent = S7.passo ? fmt(S7.passo, 0) + ' px' : '—';
+    $('r7-wait').textContent = S7.wait ? fmt(S7.wait, 0) + ' ms' : '—';
+    const boxY = S7.elemY - S7.scroll;
+    const dentro = boxY >= 0 && boxY + ELEM_H <= VP_REAL;
+    const naFaixa = boxY >= VP_REAL * 0.28 && boxY <= VP_REAL * 0.47;
+    $('r7-state').textContent = !dentro ? 'fora da janela'
+      : (naFaixa ? 'pousou na faixa ✓' : 'dentro, fora da faixa');
+    st7.render();
+  }
+
+  $('i7-pos').addEventListener('input', e => {
+    S7.elemY = +e.target.value; S7.scroll = 0; S7.plan = null; S7.iter = 0;
+    S7.passo = 0; S7.wait = 0; update7();
+  });
+  $('i7-reset').addEventListener('click', () => {
+    if (S7.anim){ cancelAnimationFrame(S7.anim); S7.anim = null; }
+    S7.scroll = 0; S7.plan = null; S7.iter = 0; S7.passo = 0; S7.wait = 0; update7();
+  });
+  $('i7-play').addEventListener('click', () => {
+    if (S7.anim){ cancelAnimationFrame(S7.anim); S7.anim = null; }
+    S7.seed = Math.random() * 999;
+    S7.scroll = 0;
+    S7.plan = planoDeRolagem();
+    S7.iter = 0;
+    if (!S7.plan.length){ update7(); return; }
+    let idx = 0, de = 0, t0 = performance.now(), fase = 'rola';
+    (function tick(now){
+      const alvo = S7.plan[idx];
+      if (fase === 'rola'){
+        const k = Math.min(1, (now - t0) / 320);
+        S7.scroll = de + (alvo.scroll - de) * suavizar(k);
+        S7.passo = alvo.passo; S7.wait = alvo.wait; S7.iter = idx + 1;
+        if (k >= 1){ fase = 'espera'; t0 = now; }
+      } else if (now - t0 >= alvo.wait){
+        de = alvo.scroll; idx++;
+        if (idx >= S7.plan.length){ S7.anim = null; update7(); return; }
+        fase = 'rola'; t0 = now;
+      }
+      update7();
+      S7.anim = requestAnimationFrame(tick);
+    })(t0);
+  });
+  update7();
+
+  /* ---------- B8: o clique ---------- */
+  const S8 = { pre: 160, hold: 98 };
+
+  const st8 = createStage($('c8'), 600, 196, function(ctx, u){
+    ctx.fillStyle = PAL.stage; ctx.fillRect(0, 0, 600, 196);
+    const L = 46, R = 556, ESC = 420;          /* 0 a 420 ms */
+    const X = ms => L + (ms / ESC) * (R - L);
+
+    const linha = (y, rotulo) => {
+      u.line(L, y, R, y, PAL.rule, 1.2);
+      u.label(rotulo, L, y - u.px(30), PAL.soft, 'left', 'middle', 700);
+    };
+
+    /* régua de tempo */
+    for (let ms = 0; ms <= 400; ms += 100){
+      u.line(X(ms), 172, X(ms), 178, PAL.rule, 1.2);
+      u.label(ms + ' ms', X(ms), 186, PAL.soft, 'center', 'middle');
+    }
+
+    /* humano */
+    linha(62, 'o clique do arquivo');
+    const barra = (x1, x2, y, cor, rot) => {
+      ctx.save();
+      ctx.fillStyle = cor; ctx.globalAlpha = .28;
+      ctx.fillRect(x1, y - u.px(13), x2 - x1, u.px(26));
+      ctx.globalAlpha = 1;
+      ctx.strokeStyle = cor; ctx.lineWidth = u.px(1.5);
+      ctx.strokeRect(x1, y - u.px(13), x2 - x1, u.px(26));
+      ctx.restore();
+      u.label(rot, (x1 + x2) / 2, y, cor, 'center', 'middle', 700);
+    };
+    barra(X(0), X(S8.pre), 62, PAL.accent, fmt(S8.pre, 0) + ' ms parado');
+    barra(X(S8.pre), X(S8.pre + S8.hold), 62, PAL.magnet, fmt(S8.hold, 0) + ' ms');
+    u.line(X(S8.pre), 40, X(S8.pre), 84, PAL.ink, 1.5);
+    u.label('down', X(S8.pre), 34, PAL.ink, 'center', 'bottom', 700);
+    u.line(X(S8.pre + S8.hold), 40, X(S8.pre + S8.hold), 84, PAL.ink, 1.5);
+    u.label('up', X(S8.pre + S8.hold), 34, PAL.ink, 'center', 'bottom', 700);
+
+    /* robô */
+    linha(140, 'um page.click() comum');
+    u.line(X(0), 122, X(0), 158, PAL.robot, 2.5);
+    u.label('down + up no mesmo instante', X(0) + u.px(10), 140, PAL.robot, 'left', 'middle', 700);
+  });
+
+  function update8(){
+    $('r8-pre').textContent = fmt(S8.pre, 0) + ' ms';
+    $('r8-hold').textContent = fmt(S8.hold, 0) + ' ms';
+    $('r8-tot').textContent = fmt(S8.pre + S8.hold, 0) + ' ms';
+    st8.render();
+  }
+  $('i8-roll').addEventListener('click', () => {
+    S8.pre = 90 + Math.floor(Math.random() * 161);
+    S8.hold = 70 + Math.floor(Math.random() * 61);
+    update8();
+  });
+  update8();
+
+  /* ---------- B9: a digitação ---------- */
+  const S9 = { texto: 'Maria Eduarda Alves', seed: 11, run: null, playT: null, anim: null };
+
+  function humanDelay(r, lo, hi){
+    let base = lo + Math.abs(r.gauss(0, (hi - lo) / 3));
+    if (r() < 0.15) base *= 1.5 + r();
+    return Math.min(base, hi * 2.5);
+  }
+
+  function gerarDigitacao(){
+    const r = rngDe(S9.seed);
+    const txt = S9.texto || ' ';
+    const teclas = [];
+    let t = 0, pensadas = 0;
+    for (const ch of txt){
+      const d = humanDelay(r, 90, 240);
+      let pausa = 0;
+      if (r() < 0.08){ pausa = 400 + r() * 800; pensadas++; }
+      t += d + pausa;
+      teclas.push({ ch, t, d, pausa });
+    }
+    const ds = teclas.map(k => k.d);
+    return { teclas, total: t, pensadas,
+             med: ds.reduce((a, b) => a + b, 0) / ds.length,
+             min: Math.min(...ds), max: Math.max(...ds) };
+  }
+  S9.run = gerarDigitacao();
+
+  /* RSD medido em 4000 sorteios */
+  function medirRSD(){
+    const r = rngDe(42);
+    const h = [], uni = [];
+    for (let i = 0; i < 4000; i++){
+      h.push(humanDelay(r, 90, 240));
+      uni.push(90 + r() * 150);
+    }
+    const rsd = arr => {
+      const m = arr.reduce((a, b) => a + b, 0) / arr.length;
+      const v = arr.reduce((a, b) => a + (b - m) * (b - m), 0) / arr.length;
+      return { m, rsd: Math.sqrt(v) / m };
+    };
+    return { h: rsd(h), u: rsd(uni), amostrasH: h, amostrasU: uni };
+  }
+  const RSD = medirRSD();
+
+  const st9 = createStage($('c9'), 600, 156, function(ctx, u){
+    ctx.fillStyle = PAL.stage; ctx.fillRect(0, 0, 600, 156);
+    const R = S9.run, L = 20, Rr = 580;
+    const X = ms => L + (ms / Math.max(R.total, 1)) * (Rr - L);
+
+    /* o texto, aparecendo */
+    const ate = S9.playT === null ? R.teclas.length
+              : R.teclas.filter(k => k.t <= S9.playT).length;
+    const escrito = R.teclas.slice(0, ate).map(k => k.ch).join('');
+    ctx.save();
+    ctx.font = '500 ' + u.px(17) + 'px ' + MONO;
+    ctx.textAlign = 'left'; ctx.textBaseline = 'middle';
+    ctx.fillStyle = PAL.ink;
+    ctx.fillText(escrito, L, 40);
+    if (S9.playT !== null){
+      const w = ctx.measureText(escrito).width;
+      ctx.fillStyle = PAL.accent;
+      ctx.fillRect(L + w + u.px(2), 40 - u.px(10), u.px(2), u.px(20));
+    }
+    ctx.restore();
+
+    /* a régua de tempo */
+    u.line(L, 104, Rr, 104, PAL.rule, 1.5);
+    R.teclas.forEach(k => {
+      const pensou = k.pausa > 0;
+      u.line(X(k.t), 104 - u.px(pensou ? 15 : 9), X(k.t), 104 + u.px(pensou ? 15 : 9),
+             pensou ? PAL.magnet : PAL.accent, pensou ? 2.2 : 1.4);
+      if (pensou)
+        u.label('pensou ' + fmt(k.pausa, 0) + ' ms', X(k.t), 104 + u.px(20),
+                PAL.magnet, 'center', 'top', 700);
+    });
+    if (S9.playT !== null){
+      const x = X(Math.min(S9.playT, R.total));
+      u.line(x, 84, x, 124, PAL.ink, 1.5, [4, 3]);
+    }
+    u.label('cada marca é uma tecla · total ' + fmt(R.total, 0) + ' ms',
+            L, 142, PAL.soft, 'left', 'middle', 700);
+  });
+
+  const st9b = createStage($('c9b'), 600, 214, function(ctx, u){
+    ctx.fillStyle = PAL.stage; ctx.fillRect(0, 0, 600, 214);
+    const L = 44, R = 572, T = 30, B = 160, MAXMS = 620, BINS = 40;
+    const X = ms => L + (ms / MAXMS) * (R - L);
+
+    const hist = arr => {
+      const c = new Array(BINS).fill(0);
+      arr.forEach(v => { const i = Math.min(BINS - 1, Math.floor(v / MAXMS * BINS)); c[i]++; });
+      return c;
+    };
+    const hh = hist(RSD.amostrasH), hu = hist(RSD.amostrasU);
+    const topo = Math.max(...hh, ...hu);
+    const bw = (R - L) / BINS;
+
+    /* uniforme, só contorno */
+    ctx.save();
+    ctx.strokeStyle = PAL.robot; ctx.lineWidth = u.px(1.5);
+    ctx.beginPath();
+    hu.forEach((c, i) => {
+      const h = (c / topo) * (B - T);
+      ctx.lineTo(L + i * bw, B - h); ctx.lineTo(L + (i + 1) * bw, B - h);
+    });
+    ctx.stroke();
+    ctx.restore();
+
+    /* human_delay, preenchido */
+    ctx.save();
+    ctx.fillStyle = PAL.accent; ctx.globalAlpha = .75;
+    hh.forEach((c, i) => {
+      const h = (c / topo) * (B - T);
+      if (h > 0.4) ctx.fillRect(L + i * bw + u.px(.5), B - h, bw - u.px(1), h);
+    });
+    ctx.restore();
+
+    u.line(L, B, R, B, PAL.rule, 1.5);
+    for (let ms = 0; ms <= 600; ms += 100){
+      u.line(X(ms), B, X(ms), B + u.px(5), PAL.rule, 1.2);
+      u.label(ms + '', X(ms), B + u.px(13), PAL.soft, 'center', 'top');
+    }
+    u.label('ms entre uma tecla e a outra', R, B + u.px(30), PAL.soft, 'right', 'top');
+    u.label('human_delay()', X(150), T - u.px(6), PAL.accent, 'left', 'bottom', 700);
+    u.label('sorteio uniforme, para comparar', X(330), T + u.px(24), PAL.robot, 'left', 'middle', 700);
+    u.line(X(240), B, X(240), T, PAL.robot, 1, [3, 3]);
+    u.label('240 ms, o "máximo" do ajuste', X(244), T + u.px(48), PAL.soft, 'left', 'middle');
+  });
+
+  function update9(){
+    const R = S9.run;
+    $('r9-n').textContent = R.teclas.length;
+    $('r9-med').textContent = fmt(R.med, 0) + ' ms';
+    $('r9-mm').textContent = fmt(R.min, 0) + ' / ' + fmt(R.max, 0) + ' ms';
+    $('r9-think').textContent = R.pensadas;
+    $('r9-tot').textContent = fmt(R.total / 1000, 2) + ' s';
+    $('r9-rsd').textContent = fmt(RSD.h.rsd * 100, 0) + ' %';
+    $('r9-rsdu').textContent = fmt(RSD.u.rsd * 100, 0) + ' %';
+    st9.render(); st9b.render();
+  }
+
+  $('i9-txt').addEventListener('input', e => {
+    S9.texto = e.target.value; S9.run = gerarDigitacao(); S9.playT = null; update9();
+  });
+  $('i9-roll').addEventListener('click', () => {
+    S9.seed = Math.random() * 999; S9.run = gerarDigitacao(); S9.playT = null; update9();
+  });
+  $('i9-play').addEventListener('click', () => {
+    if (S9.anim){ cancelAnimationFrame(S9.anim); S9.anim = null; }
+    const t0 = performance.now(), fim = S9.run.total + 400;
+    (function tick(now){
+      S9.playT = now - t0;
+      if (S9.playT >= fim){ S9.playT = null; S9.anim = null; update9(); return; }
+      update9();
+      S9.anim = requestAnimationFrame(tick);
+    })(t0);
+  });
+  update9();
+
+  /* ---------- B10: o warmup ---------- */
+  const S10 = { n: 10, seed: 17 };
+
+  const st10 = createStage($('c10'), 600, 306, function(ctx, u){
+    ctx.fillStyle = PAL.stage; ctx.fillRect(0, 0, 600, 306);
+    const r = rngDe(S10.seed);
+    const M = 26;                                   /* margem de 60 px, em escala */
+
+    ctx.save();
+    ctx.strokeStyle = PAL.ink; ctx.lineWidth = u.px(2);
+    ctx.strokeRect(10, 10, 580, 286);
+    ctx.restore();
+    ctx.save();
+    ctx.strokeStyle = PAL.robot; ctx.lineWidth = u.px(1); ctx.setLineDash([u.px(4), u.px(4)]);
+    ctx.strokeRect(10 + M, 10 + M, 580 - M * 2, 286 - M * 2);
+    ctx.restore();
+    u.label('margem de 60 px', 10 + M + u.px(6), 10 + M + u.px(10), PAL.robot, 'left', 'top');
+
+    let cur = { x: 10 + M + r() * 120, y: 10 + M + r() * 120 };
+    let dist = 0, tempo = 0;
+    const paradas = [cur];
+
+    for (let i = 0; i < S10.n; i++){
+      const alvo = {
+        x: Math.min(Math.max(10 + M, cur.x + (r() * 2 - 1) * 200), 590 - M),
+        y: Math.min(Math.max(10 + M, cur.y + (r() * 2 - 1) * 120), 296 - M)
+      };
+      const dx = alvo.x - cur.x, dy = alvo.y - cur.y;
+      const len = Math.hypot(dx, dy) || 1;
+      const bend = Math.min(60, len * (0.15 + r() * 0.2)) * (r() < 0.5 ? -1 : 1);
+      const ctrl = { x: (cur.x + alvo.x) / 2 + (-dy / len) * bend,
+                     y: (cur.y + alvo.y) / 2 + (dx / len) * bend };
+
+      ctx.save();
+      ctx.strokeStyle = PAL.accent; ctx.lineWidth = u.px(1.8); ctx.lineCap = 'round';
+      ctx.globalAlpha = .45 + (i / Math.max(1, S10.n - 1)) * .55;
+      ctx.beginPath();
+      for (let s = 0; s <= 40; s++){
+        const p = pontoNaCurva(cur, ctrl, alvo, s / 40);
+        if (s === 0) ctx.moveTo(p.x, p.y); else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      ctx.restore();
+
+      dist += len;
+      tempo += Math.max(12, len / 9) * 12 + (60 + r() * 120);
+      cur = alvo;
+      paradas.push(alvo);
+    }
+
+    paradas.forEach((p, i) => u.dot(p.x, p.y, i === 0 ? 5 : 3,
+                                    i === 0 ? PAL.ink : PAL.accent, PAL.stage));
+    u.label('começa aqui', paradas[0].x, paradas[0].y - u.px(14), PAL.ink, 'center', 'bottom', 700);
+    u.cursor(cur.x, cur.y, PAL.accent);
+
+    S10._dist = dist; S10._tempo = tempo;
+  });
+
+  function update10(){
+    $('v10-n').textContent = S10.n;
+    st10.render();
+    $('r10-dist').textContent = fmt((S10._dist || 0) * 2.2, 0) + ' px';
+    $('r10-t').textContent = fmt((S10._tempo || 0) / 1000, 1) + ' s';
+  }
+  $('i10-n').addEventListener('input', e => { S10.n = +e.target.value; update10(); });
+  $('i10-roll').addEventListener('click', () => { S10.seed = Math.random() * 999; update10(); });
+  update10();
+})();
+</script>
+
+</body>
+</html>
